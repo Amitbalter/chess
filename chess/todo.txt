@@ -1,0 +1,7 @@
+To do:
+
+change letters on board to pieces
+redo, undo, takeback buttons
+
+
+need to make sure king square stays purple for duration of move
