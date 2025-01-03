@@ -46,9 +46,17 @@ class rook extends piece{
                         if (k === board.turn % 2){
                             board.updateBoardMoves(1-k)
                             let check = false
-                            for (let s = 1; s < 3 ;s++){
+                            for (let s = 0; s < 3 ;s++){
                                 if (board.moves[1-k].includes([row, 3 + n*s].join(''))){
                                     check = true
+                                    break
+                                }
+                            }
+                            for (let s = 0; s < 4 ;s++){
+                                let pawn = board.array[[1,6][k]][3 + n*s].piece //separate check for pawns
+                                if (pawn.label === 'P' && pawn.color !== this.color){
+                                    check = true
+                                    break
                                 }
                             }
                             if (!check){

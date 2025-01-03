@@ -3,6 +3,7 @@ import Square from './Square';
 import { board } from '../dynamics/board';
 import { king } from '../dynamics/king';
 import { pawn } from '../dynamics/pawn';
+import { rook } from '../dynamics/rook';
 import { use } from 'react';
 import whitePawn from "./assets/whitePawn.png"
 
@@ -19,8 +20,7 @@ function Board() {
     
     
     function handleFlip(){
-        setFlip(f => 1-f)
-        updateBoard(gameBoard)
+        setFlip(f => 1 - f)
     } 
 
     function resetColors(){
@@ -42,16 +42,16 @@ function Board() {
     const [gameBoard, setGameBoard] = useState(new board()) 
     useEffect(()=>{
         const dummyBoard = new board()
-        // dummyBoard.setPiece(5, 4, new king('black')) 
         // dummyBoard.setPiece(0, 3, new king('white')) 
-        // dummyBoard.setPiece(1, 6, new pawn('black'))
-        // dummyBoard.setPiece(1, 3, new pawn('white')) 
-        // dummyBoard.setPiece(0, 4, new rook('white'))
-        // dummyBoard.setPiece(7, 0, new rook('black'))
+        // dummyBoard.setPiece(7, 0, new rook('black')) 
+        // dummyBoard.setPiece(7, 3, new king('black')) 
+        // dummyBoard.setPiece(5, 0, new pawn('white'))
+        // dummyBoard.setPiece(7, 7, new rook('black'))
+        // dummyBoard.setPiece(0, 7, new rook('white'))
         // dummyBoard.history.push(JSON.parse(JSON.stringify(dummyBoard)))
         // dummyBoard.updateBoardMoves(0)
         dummyBoard.setupBoard()
-        setGameBoard(dummyBoard)
+        setGameBoard(dummyBoard) //updating with dummy board to trigger re-render
     },[])
 
     const [i1, seti1] = useState(null)
@@ -122,7 +122,7 @@ function Board() {
         else{
             setPiece1(null)
         }
-    },[i1,j1])
+    },[i1,j1,flip])
 
     //highlighting possible squares in green
     useEffect(() => {
@@ -132,12 +132,14 @@ function Board() {
                 buttons.current[[k,7-k][flip]][[l,7-l][flip]].current.style.backgroundColor = 'green'
             }
         }
-    },[piece1])
+    },[piece1,flip])
     
     useEffect(()=>{
-        if (gameBoard.turn >= 1){
-            let [k,l] = gameBoard.pieces[gameBoard.turn % 2].find(piece => piece.label === 'K').position
-            let [m,n] = gameBoard.pieces[(gameBoard.turn+1) % 2].find(piece => piece.label === 'K').position        
+        let king1 = gameBoard.pieces[gameBoard.turn % 2].find(piece => piece.label === 'K')
+        let king2 = gameBoard.pieces[(gameBoard.turn+1) % 2].find(piece => piece.label === 'K')
+        if (king1 && king2){
+            let [k,l] = king1.position
+            let [m,n] = king2.position        
             switch (result){
                 case 'check':
                     console.log('king is in check')
@@ -162,18 +164,17 @@ function Board() {
                     break
             }
         }
-    },[gameBoard.turn])
+    },[gameBoard.turn,flip])
     
     //highlighting king in orange if in check
     useEffect(() => {
         if (check !== null){
             const [k,l] = [check[0],check[1]]
             if (k !== i1 || l !== j1){
-                console.log('hello')
                 buttons.current[[k,7-k][flip]][[l,7-l][flip]].current.style.backgroundColor = 'orange'
             }
         }    
-    },[check,i1,j1])
+    },[check,i1,j1,flip])
     
     return (<>
         <div className='board'>
@@ -188,6 +189,9 @@ function Board() {
                     color = {gameBoard.array[[row,7-row][flip]][[col,7-col][flip]].piece.color}
                     />
                 ))))}
+        </div>
+        <div className='options'>
+            <button className='option-button' onClick={handleFlip}>Flip Board</button>
         </div>
         </>
     );
