@@ -1,0 +1,39 @@
+.board{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows:    1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    aspect-ratio: 1;
+    border: 5px solid;
+    max-width: 500px;
+  }
+  
+  .square_0, .square_1{
+    border-radius: 0%;
+    border-width: 0;
+    padding: 0;
+
+  }
+
+  .square_0{
+    background-color: rgba(155, 121, 10, 0.49);
+  }
+
+  .square_1{
+    background-color: rgb(114, 76, 32);
+  }
+
+  .image{
+    width: 100%;
+    height: auto;
+    vertical-align: middle;
+  }
+
+  .options{
+    height: 80px
+  }
+  
+  .option-button{
+    height: 100%;
+    aspect-ratio: 1;
+    vertical-align: top
+  }
