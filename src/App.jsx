@@ -6,6 +6,7 @@ function Home(){
 
   return(<div>
     <h1>Welcome to my chess app!</h1>
+    <h2>Choose which option to play:</h2>
     <Link to='/gameWhite'>Play as White</Link>
     <Link to='/gameBlack'>Play as Black</Link>
     <Link to='/gameFriend'>Play with a friend</Link>
