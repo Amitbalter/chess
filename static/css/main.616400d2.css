@@ -1,0 +1,2 @@
+.board{aspect-ratio:1;border:5px solid;display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;grid-template-rows:1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;max-width:500px}.square_0,.square_1{border-radius:0;border-width:0;padding:0}.square_0{background-color:#9b790a7d}.square_1{background-color:#724c20}.image{height:auto;vertical-align:middle;width:100%}.options{height:80px}.option-button{aspect-ratio:1;height:100%;vertical-align:top}
+/*# sourceMappingURL=main.616400d2.css.map*/
