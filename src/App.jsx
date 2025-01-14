@@ -15,6 +15,7 @@ function Home(){
       </ul>
     </nav>
     <a href="https://github.com/Amitbalter/chess" target="_blank">The source code can be found here</a>
+    <p>testing</p>
   </div>)
 }
 
