@@ -58,6 +58,28 @@ class king extends piece{
             }
         }
     }
+
+    move(i1, j1, i2, j2, board){
+        const square1 = board.array[i1][j1]
+        const square2 = board.array[i2][j2]
+        const piece = square2.piece
+        const player = -2*['white', 'black'].indexOf(this.color)+1
+        if (this.color !== piece.color){
+            this.castle = 'N'    
+            board.doMove(square1, square2)
+            return true
+        }
+        else {
+            const index = ['K','R'].indexOf(piece.label)
+            const row = 7 * ['white','black'].indexOf(this.color)
+            const side = 2*[j1,j2][index]/7 - 1
+            board.doMove([square1,square2][index], board.array[row][3 + side])
+            board.doMove([square1,square2][(index+1)%2], board.array[row][3 + 2*side])
+            this.castle = 'N'
+            piece.castle = 'N'
+            return true       
+        }
+    }
 }
 
 export {king}

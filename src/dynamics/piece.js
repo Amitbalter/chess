@@ -12,34 +12,11 @@ class piece{
         const square1 = board.array[i1][j1]
         const square2 = board.array[i2][j2]
         const piece = square2.piece
-        const k = -2*['white', 'black'].indexOf(this.color)+1
-        if (this.label === 'P' && i1 + 2*k === i2){
-            board.enPassant[(1-k)/2] = j1
-            board.doMove(square1, square2)
-            return true
-        }
-        else if(this.label === 'P' && piece.label === ' ' && j1 !== j2){
-            board.setPiece((7+k)/2, j2, new empty())
-            board.doMove(square1, square2)
-            return true
-        }
-        else if (this.label === 'P' && i2 === 7*(k+1)/2){
-            return 'promotion'
-        }
-        else if (this.color !== piece.color){
+        const player = -2*['white', 'black'].indexOf(this.color)+1
+        if (this.color !== piece.color){
             this.castle = 'N'    
             board.doMove(square1, square2)
             return true
-        }
-        else {
-            const index = ['K','R'].indexOf(piece.label)
-            const row = 7 * ['white','black'].indexOf(this.color)
-            const side = 2*[j1,j2][index]/7 - 1
-            board.doMove([square1,square2][index], board.array[row][3 + side])
-            board.doMove([square1,square2][(index+1)%2], board.array[row][3 + 2*side])
-            this.castle = 'N'
-            piece.castle = 'N'
-            return true       
         }
     }
     

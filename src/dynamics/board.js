@@ -212,8 +212,7 @@ class board{
                             else{
                                 let value = copy2.valuation()
                                 if (value >= currentValue){
-                                    currentValue = value
-                                    bestMove = [i1,j1,i2,j2]
+                                    return [i1,j1,i2,j2]
                                 }
                             }
                         }

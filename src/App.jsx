@@ -7,9 +7,14 @@ function Home(){
   return(<div>
     <h1>Welcome to my chess app!</h1>
     <h2>Choose which option to play:</h2>
-    <Link to='/gameWhite'>Play as White</Link>
-    <Link to='/gameBlack'>Play as Black</Link>
-    <Link to='/gameFriend'>Play with a friend</Link>
+    <nav className='navbar'>
+      <ul>
+        <li><Link to='/gameWhite' className = 'homepageLink'>Play as White</Link></li>
+        <li><Link to='/gameBlack' className = 'homepageLink'> Play as Black</Link></li>
+        <li><Link to='/gameFriend' className = 'homepageLink'>Play with a friend</Link></li>
+      </ul>
+    </nav>
+    <a href="https://github.com/Amitbalter/chess" target="_blank">The source code can be found here</a>
   </div>)
 }
 
@@ -22,6 +27,11 @@ function App() {
         <Route path='/gameWhite' element ={<Game player = {0}/>}/>
         <Route path='/gameBlack' element ={<Game player = {1}/>}/>
         <Route path='/gameFriend' element ={<Game player = {null}/>}/>
+        <Route path='/source_code' component={() => {
+              window.location.href = 'https://github.com/Amitbalter/chess';
+              return null;
+              }}
+        />
       </Routes>
     </Router>
   )

@@ -1,4 +1,5 @@
 import { piece } from './piece.js'
+import { empty } from './empty.js'
 
 class pawn extends piece {
     constructor(color){
@@ -45,6 +46,31 @@ class pawn extends piece {
                     }
                 }
             }  
+        }
+    }
+
+    move(i1, j1, i2, j2, board){
+        const square1 = board.array[i1][j1]
+        const square2 = board.array[i2][j2]
+        const piece = square2.piece
+        const player = -2*['white', 'black'].indexOf(this.color)+1
+        if (this.label === 'P' && i1 + 2*player === i2){
+            board.enPassant[(1-player)/2] = j1
+            board.doMove(square1, square2)
+            return true
+        }
+        else if(this.label === 'P' && piece.label === ' ' && j1 !== j2){
+            board.setPiece((7+player)/2, j2, new empty())
+            board.doMove(square1, square2)
+            return true
+        }
+        else if (this.label === 'P' && i2 === 7*(player+1)/2){
+            return 'promotion'
+        }
+        else if (this.color !== piece.color){
+            this.castle = 'N'    
+            board.doMove(square1, square2)
+            return true
         }
     }
 }

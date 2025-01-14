@@ -6,8 +6,6 @@ import { king } from './dynamics/king';
 import { pawn } from './dynamics/pawn';
 import { rook } from './dynamics/rook';
 import { bishop } from './dynamics/bishop';
-import { use } from 'react';
-import whitePawn from "./assets/whitePawn.png"
 import { knight } from './dynamics/knight';
 
 
@@ -19,8 +17,14 @@ export default function Game({player}) {
     };
 
     const colors = ['white','black']
-    const [flip, setFlip] = useState(1-player)
-    const [computer, setComputer] = useState(1-player)
+    const [flip, setFlip] = useState(1)
+    const [computer, setComputer] = useState(null)
+    useEffect(()=>{
+        if (player !== null){
+            setFlip(1-player)
+            setComputer(1-player)
+        }
+    },[])
     const [i1, seti1] = useState(null)
     const [j1, setj1] = useState(null)
     const [i2, seti2] = useState(null)
@@ -80,10 +84,10 @@ export default function Game({player}) {
     }
 
     function handleRedo(){
-        if (undo + 2 <= gameBoard.history.length){
+        if (undo + 2 <= Object.keys(gameBoard.history).length){
             const dummyboard = gameBoard.replicate(undo + 1)
             dummyboard.history = gameBoard.history
-            if (undo + 2 === gameBoard.history.length){
+            if (undo + 2 === Object.keys(gameBoard.history).length){
                 dummyboard.updateBoardMoves(dummyboard.turn % 2)
                 disableButtons(false)
             }
@@ -206,7 +210,9 @@ export default function Game({player}) {
             seti2(null)
             setj1(null)
             setj2(null)
-            // setFlip(1-flip)
+            // if (computer === null){
+            //     setFlip(1-flip)
+            // }
         }
     },[i2,j2])
 

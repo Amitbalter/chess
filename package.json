@@ -1,8 +1,8 @@
 {
-  "homepage": "https://Amitbalter.github.io/chess",
   "name": "chess",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://Amitbalter.github.io/chess",
   "dependencies": {
     "cra-template": "1.2.0",
     "react": "^19.0.0",
