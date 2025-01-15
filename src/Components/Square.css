@@ -1,0 +1,19 @@
+.square_0{
+    background-color: rgba(155, 121, 10, 0.49);
+    border-radius: 0%;
+    border-width: 0;
+    padding: 0;
+}
+
+.square_1{
+    background-color: rgb(114, 76, 32);
+    border-radius: 0%;
+    border-width: 0;
+    padding: 0;
+}
+
+.image{
+    width: 100%;
+    height: auto;
+    vertical-align: middle;
+}

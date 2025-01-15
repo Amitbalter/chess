@@ -1,0 +1,21 @@
+.navbar ul{
+    list-style-type: none;
+    background-color: grey;
+    padding: 0px;
+    max-width:600px;
+    margin: auto;
+  }
+
+  .homepageLink{
+    color:white;
+    height: 50px;
+    text-decoration: none;
+    padding:15px;
+    display: block;
+    text-align: center;
+    align-items: center;
+  }
+
+  .homepageLink:hover{
+    background-color: hsl(0, 0%, 10%);
+  }

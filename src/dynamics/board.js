@@ -6,6 +6,7 @@ import { queen } from './queen.js'
 import { king } from './king.js'
 import { empty } from './empty.js'
 import { piece } from './piece.js'
+import { equalArrangments,stringifyArray} from './other.js'
 
 class square{
     constructor(color, position, piece){
@@ -188,7 +189,8 @@ class board{
 
     bestMove(){
         let currentValue = this.valuation()
-        let bestMove = null
+        const possibleMoves = []
+        let value;
         for (let piece1 of this.pieces[this.turn%2]){
             for (let move1 of piece1.moves){
                 const copy = this.replicate(this.turn)
@@ -196,31 +198,14 @@ class board{
                 const [i2,j2] = [Number(move1[0]),Number(move1[1])]
                 const result1 = copy.makeMove(i1,j1,i2,j2)
                 if (result1 === 'checkmate'){
-                    return [i1,j1,i2,j2]
+                    value = 1000
                 }
-                else{
-                    copy.updateBoardMoves(copy.turn % 2) //update moves of opposite color
-                    for (let piece2 of copy.pieces[copy.turn%2]){
-                        for (let move2 of piece2.moves){
-                            const copy2 = copy.replicate(copy.turn)
-                            const [k1,l1] = piece2.position
-                            const [k2,l2] = [Number(move2[0]),Number(move2[1])]
-                            const result2 = copy2.makeMove(k1,l1,k2,l2)
-                            if (result2 === 'checkmate'){
-                                break
-                            }
-                            else{
-                                let value = copy2.valuation()
-                                if (value >= currentValue){
-                                    return [i1,j1,i2,j2]
-                                }
-                            }
-                        }
-                    }
-                }
+                else value = copy.valuation()
+                possibleMoves.push([i1,j1,i2,j2,value])
             }
         }
-        return bestMove
+        console.log(possibleMoves)
+        return possibleMoves[0].slice(0,-1)
     }
 
     valuation(){
@@ -235,24 +220,41 @@ class board{
     }
 }
 
-function equalArrangments(arr1, arr2){
-    if(JSON.stringify(arr1.enPassant) === JSON.stringify(arr2.enPassant)){
-        if (stringifyArray(arr1.array) === stringifyArray(arr2.array)){
-            return true
-        }
-    }
-    return false
-}
+// bestMove(){
+//     let currentValue = this.valuation()
+//     let bestMove = null
+//     for (let piece1 of this.pieces[this.turn%2]){
+//         for (let move1 of piece1.moves){
+//             const copy = this.replicate(this.turn)
+//             const [i1,j1] = piece1.position
+//             const [i2,j2] = [Number(move1[0]),Number(move1[1])]
+//             const result1 = copy.makeMove(i1,j1,i2,j2)
+//             if (result1 === 'checkmate'){
+//                 return [i1,j1,i2,j2]
+//             }
+//             else{
+//                 copy.updateBoardMoves(copy.turn % 2) //update moves of opposite color
+//                 for (let piece2 of copy.pieces[copy.turn%2]){
+//                     for (let move2 of piece2.moves){
+//                         const copy2 = copy.replicate(copy.turn)
+//                         const [k1,l1] = piece2.position
+//                         const [k2,l2] = [Number(move2[0]),Number(move2[1])]
+//                         const result2 = copy2.makeMove(k1,l1,k2,l2)
+//                         if (result2 === 'checkmate'){
+//                             break
+//                         }
+//                         else{
+//                             let value = copy2.valuation()
+//                             if (value >= currentValue){
+//                                 return [i1,j1,i2,j2]
+//                             }
+//                         }
+//                     }
+//                 }
+//             }
+//         }
+//     }
+//     return bestMove
+// }
 
-function stringifyArray(array){
-    let string = ''
-    for (let i = 0;i < 8;i++){
-        for (let j = 0;j < 8;j++){
-            string += array[i][j].piece.label
-            string += array[i][j].piece.color
-            string += array[i][j].piece.castle
-        }   
-    }
-    return string
-}
 export {board}

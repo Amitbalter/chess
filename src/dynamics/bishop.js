@@ -27,6 +27,7 @@ class bishop extends piece{
                 } 
             }
         }
+        
     }
 }
 

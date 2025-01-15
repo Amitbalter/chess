@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
+import Topbar from './Topbar';
 import {Link} from 'react-router-dom'
 import Square from './Square';
-import { board } from './dynamics/board';
-import { king } from './dynamics/king';
-import { pawn } from './dynamics/pawn';
-import { rook } from './dynamics/rook';
-import { bishop } from './dynamics/bishop';
-import { knight } from './dynamics/knight';
-
+import { board } from '../dynamics/board';
+import { king } from '../dynamics/king';
+import { pawn } from '../dynamics/pawn';
+import { rook } from '../dynamics/rook';
+import { bishop } from '../dynamics/bishop';
+import { knight } from '../dynamics/knight';
+import './Game.css'
 
 export default function Game({player}) {
 
@@ -245,28 +246,33 @@ export default function Game({player}) {
         setUndo(gameBoard.turn)
     },[gameBoard.turn,flip])
     
-    return (<div className='game'>
-                <div className='board'>
-                    {Array.from({length:8}).map((_, row) => (
-                        Array.from({length:8}).map((_, col) =>(
-                            <Square
-                            key = {[row,col]}
-                            index = {[row,col]}
-                            addRef = {addButtonRef}
-                            onFocus = {setInput}
-                            piece = {gameBoard.array[[row,7-row][flip]][[col,7-col][flip]].piece.label}
-                            color = {gameBoard.array[[row,7-row][flip]][[col,7-col][flip]].piece.color}
-                            />
-                        ))))}
-                </div>
-                <div className='options'>
-                    <button className='option-button' onClick={handleFlip}>Flip Board</button>
-                    <button className='option-button' onClick={handleTakeback}>Takeback</button>
-                    <button className='option-button' onClick={handleUndo}>Undo</button>
-                    <button className='option-button' onClick={handleRedo}>Redo</button>
-                </div>
-                <Link to='/'>Back to Home</Link>
+    return (
+        <>
+        <Topbar/>
+        <div className='game'>
+            <div className='board'>
+                {Array.from({length:8}).map((_, row) => (
+                    Array.from({length:8}).map((_, col) =>(
+                        <Square
+                        key = {[row,col]}
+                        index = {[row,col]}
+                        addRef = {addButtonRef}
+                        onFocus = {setInput}
+                        piece = {gameBoard.array[[row,7-row][flip]][[col,7-col][flip]].piece.label}
+                        color = {gameBoard.array[[row,7-row][flip]][[col,7-col][flip]].piece.color}
+                        />
+                    ))))}
             </div>
-
+            <nav className='options'>
+                <ul>
+                    <li><button className='option-button' onClick={handleFlip}>Flip Board</button></li>
+                    <li><button className='option-button' onClick={handleTakeback}>Takeback</button></li>
+                    <li><button className='option-button' onClick={handleUndo}>Undo</button></li>
+                    <li><button className='option-button' onClick={handleRedo}>Redo</button></li>
+                </ul>
+            </nav>
+        </div>
+        </>
+        
     );
 }

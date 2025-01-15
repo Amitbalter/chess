@@ -1,17 +1,18 @@
 import React, { useEffect, useRef } from 'react';
-import whitePawn from "./assets/whitePawn.png"
-import whiteKnight from "./assets/whiteKnight.png"
-import whiteBishop from "./assets/whiteBishop.png"
-import whiteRook from "./assets/whiteRook.png"
-import whiteKing from "./assets/whiteKing.png"
-import whiteQueen from "./assets/whiteQueen.png"
-import blackPawn from "./assets/blackPawn.png"
-import blackKnight from "./assets/blackKnight.png"
-import blackBishop from "./assets/blackBishop.png"
-import blackRook from "./assets/blackRook.png"
-import blackKing from "./assets/blackKing.png"
-import blackQueen from "./assets/blackQueen.png"
-import empty from "./assets/empty.png"
+import './Square.css'
+import whitePawn from "../assets/whitePawn.png"
+import whiteKnight from "../assets/whiteKnight.png"
+import whiteBishop from "../assets/whiteBishop.png"
+import whiteRook from "../assets/whiteRook.png"
+import whiteKing from "../assets/whiteKing.png"
+import whiteQueen from "../assets/whiteQueen.png"
+import blackPawn from "../assets/blackPawn.png"
+import blackKnight from "../assets/blackKnight.png"
+import blackBishop from "../assets/blackBishop.png"
+import blackRook from "../assets/blackRook.png"
+import blackKing from "../assets/blackKing.png"
+import blackQueen from "../assets/blackQueen.png"
+import empty from "../assets/empty.png"
 
 const pieceImages = {
                     'white':{

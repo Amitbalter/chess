@@ -1,0 +1,27 @@
+.topbar ul{
+    list-style-type: none;
+    background-color: grey;
+    padding: 0px;
+    margin: 0px;
+    overflow: hidden;
+    width: fit-content;
+}
+
+.topbar_item{
+    color:white;
+    text-decoration: none;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    padding-inline: 60px;
+    display: block;
+    text-align: center;
+    align-items: center;
+}
+
+.topbar_item:hover{
+    background-color: rgba(58, 58, 58, 0.253) ;
+}
+
+.topbar li{
+    float: left;
+}
