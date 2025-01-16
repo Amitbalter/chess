@@ -32,6 +32,7 @@ class board{
         this.turn = 0
         this.check = null
         this.history = {}
+        this.lastMove = null
     }
     
     setupBoard(){
@@ -106,6 +107,7 @@ class board{
         copy.enPassant = [...arrangement.enPassant]
         copy.check = arrangement.check
         copy.pieces = [[],[]]
+        copy.lastMove = arrangement.lastMove
         for (let k of [0,1]){
             for (let piece of arrangement.pieces[k]){
                 const pieces = [new pawn(piece.color), new knight(piece.color), new bishop(piece.color),
@@ -146,6 +148,7 @@ class board{
             this.turn ++
             this.enPassant[this.turn % 2] = null
             this.check = null
+            this.lastMove = [i1,j1,i2,j2]
             
             const arrangement = JSON.parse(JSON.stringify(this))
             arrangement.history = {}
@@ -187,28 +190,39 @@ class board{
         }
     }
 
-    bestMove(){
-        let currentValue = this.valuation()
+    bestPosition(depth){
         const possibleMoves = []
-        let value;
+        let values = []
         for (let piece1 of this.pieces[this.turn%2]){
             for (let move1 of piece1.moves){
                 const copy = this.replicate(this.turn)
                 const [i1,j1] = piece1.position
                 const [i2,j2] = [Number(move1[0]),Number(move1[1])]
                 const result1 = copy.makeMove(i1,j1,i2,j2)
+                possibleMoves.push([i1,j1,i2,j2])
                 if (result1 === 'checkmate'){
-                    value = 1000
+                    values.push(1000) 
                 }
-                else value = copy.valuation()
-                possibleMoves.push([i1,j1,i2,j2,value])
+                else {
+                    if (depth === 0){
+                        values.push(copy.valuation(this.turn))
+                    }
+                    else{
+                        values.push(-copy.bestPosition(depth-1)[1])
+                    }           
+                } 
             }
         }
-        console.log(possibleMoves)
-        return possibleMoves[0].slice(0,-1)
+        const maxValue = Math.max(...values)
+        const bestMove = possibleMoves[values.indexOf(maxValue)]
+        return [bestMove,maxValue]
     }
 
-    valuation(){
+    bestMove(depth){
+        return this.bestPosition(depth)[0]
+    }
+
+    valuation(turn){
         const values = {'P':1, 'N':3, 'B':3, 'R': 5, 'Q':9, 'K':0}
         let valuation = 0
         for (let k of [0,1]){
@@ -216,7 +230,7 @@ class board{
                 valuation += (1-2*k)*values[piece.label]
             }
         }
-        return valuation*(1-2*(this.turn%2))
+        return valuation*(1-2*(turn%2))
     }
 }
 

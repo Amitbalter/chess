@@ -14,9 +14,9 @@ function App() {
         <Route path='/' element ={<Home/>}/>
         <Route path= '/About' element = {<About/>}/>
         <Route path= '/Contact' element = {<Contact/>}/>
-        <Route path='/gameWhite' element ={<Game player = {0}/>}/>
-        <Route path='/gameBlack' element ={<Game player = {1}/>}/>
-        <Route path='/gameFriend' element ={<Game player = {null}/>}/>
+        <Route path='/gameWhite' element ={<Game computer = {1}/>}/>
+        <Route path='/gameBlack' element ={<Game computer = {0}/>}/>
+        <Route path='/gameFriend' element ={<Game computer = {null}/>}/>
       </Routes>
     </Router>
   )

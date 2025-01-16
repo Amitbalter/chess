@@ -1,4 +1,5 @@
-const test = {}
-test[0] = 1
-test[4] = 5
-console.log(test[0])
+
+// if (x === null) return 1
+// else return x
+const computer = 0
+console.log(computer ?? 1)

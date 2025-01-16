@@ -45,7 +45,7 @@ export default function Square({addRef, onFocus, index, piece, color}) {
 
     function handleClick() {
         if (buttonRef.current) {
-            onFocus(buttonRef, index);
+            onFocus(buttonRef, index)
         }
     }
     

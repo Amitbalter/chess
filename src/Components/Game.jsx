@@ -10,22 +10,16 @@ import { bishop } from '../dynamics/bishop';
 import { knight } from '../dynamics/knight';
 import './Game.css'
 
-export default function Game({player}) {
+export default function Game({computer}) {
 
-    const buttons = useRef(Array.from({length:8},( _ => [])));
+    const buttons = useRef(Array.from({length:8},( _ => [])))
     const addButtonRef = (ref, index) => {
         buttons.current[index[0]][index[1]] = ref
-    };
+    }
+    const redoRef = useRef(null)
 
     const colors = ['white','black']
-    const [flip, setFlip] = useState(1)
-    const [computer, setComputer] = useState(null)
-    useEffect(()=>{
-        if (player !== null){
-            setFlip(1-player)
-            setComputer(1-player)
-        }
-    },[])
+    const [flip, setFlip] = useState(computer ?? 1)
     const [i1, seti1] = useState(null)
     const [j1, setj1] = useState(null)
     const [i2, seti2] = useState(null)
@@ -35,6 +29,7 @@ export default function Game({player}) {
     const [gameBoard, setGameBoard] = useState(new board())
     const [prev, setPrev] = useState(null)
     const [next,setNext] = useState(0)
+    const [restart, setRestart] = useState(0)
     
     function handleFlip(){
         setFlip(1-flip)
@@ -57,20 +52,30 @@ export default function Game({player}) {
     }
 
     function handleTakeback(){
-        if (gameBoard.turn > 0){
-            const dummyboard = gameBoard.replicate(gameBoard.turn - 1)
+        let dummyboard
+        if (computer === null && gameBoard.turn >= 1){
+            dummyboard = gameBoard.replicate(gameBoard.turn - 1)
             delete gameBoard.history[gameBoard.turn]
             dummyboard.history = gameBoard.history
             dummyboard.updateBoardMoves(dummyboard.turn % 2)
             setGameBoard(dummyboard)
-            seti1(null)
-            seti2(null)
-            setj1(null)
-            setj2(null)
-            setResult(null)
-            setPrev(null)
-            resetColors()
+            setPrev(dummyboard.lastMove)
         }
+        else if(gameBoard.turn >= 2 ){
+            dummyboard = gameBoard.replicate(gameBoard.turn - 2)
+            delete gameBoard.history[gameBoard.turn]
+            delete gameBoard.history[gameBoard.turn-1]
+            dummyboard.history = gameBoard.history
+            dummyboard.updateBoardMoves(dummyboard.turn % 2)
+            setGameBoard(dummyboard)
+            setPrev(dummyboard.lastMove)
+        }
+        seti1(null)
+        seti2(null)
+        setj1(null)
+        setj2(null)
+        setResult(null)
+        
     } 
 
     function handleUndo(){
@@ -79,7 +84,7 @@ export default function Game({player}) {
             dummyboard.history = gameBoard.history
             setGameBoard(dummyboard)
             disableButtons(true)
-            resetColors()
+            setPrev(dummyboard.lastMove)
             setUndo(undo - 1)
         }
     }
@@ -93,14 +98,21 @@ export default function Game({player}) {
                 disableButtons(false)
             }
             setGameBoard(dummyboard)
-            resetColors()
+            setPrev(dummyboard.lastMove)
             setUndo(undo + 1)
         }
     }
 
+    function handleRestart(){
+        setRestart(restart+1)
+        setResult(null)
+        setPrev(null)
+        disableButtons(false)
+    }
+
     function generateMove(){
-        const move = gameBoard.bestMove()
-        if (move !== null){
+        const move = gameBoard.bestMove(0)
+        if (move){
             seti1(move[0])
             setj1(move[1])
             seti2(move[2])
@@ -147,6 +159,7 @@ export default function Game({player}) {
     }
     
     useEffect(()=>{
+        resetColors()
         const dummyBoard = new board()
         // dummyBoard.setPiece(0, 3, new king('white')) 
         // dummyBoard.setPiece(3, 0, new bishop('white')) 
@@ -160,7 +173,7 @@ export default function Game({player}) {
         dummyBoard.setupBoard()
         setGameBoard(dummyBoard) //updating with dummy board to trigger re-render
         setNext(1-next)
-    },[])
+    },[restart])
 
     //coloring previous move in blue
     useEffect(()=>{
@@ -170,7 +183,6 @@ export default function Game({player}) {
             buttons.current[[prev[2],7-prev[2]][flip]][[prev[3],7-prev[3]][flip]].current.style.backgroundColor = 'rgba(68, 114, 212, 0.78)'
             setNext(1-next)
         }
-        
     },[prev,i1,j1,flip])
 
     useEffect(()=>{
@@ -211,9 +223,6 @@ export default function Game({player}) {
             seti2(null)
             setj1(null)
             setj2(null)
-            // if (computer === null){
-            //     setFlip(1-flip)
-            // }
         }
     },[i2,j2])
 
@@ -245,7 +254,16 @@ export default function Game({player}) {
         }
         setUndo(gameBoard.turn)
     },[gameBoard.turn,flip])
-    
+
+    useEffect(() => {
+        if (undo + 2 <= Object.keys(gameBoard.history).length){
+            redoRef.current.style.backgroundColor = 'green'
+        }
+        else{
+            redoRef.current.style.backgroundColor = ''
+        }
+    },[undo])
+
     return (
         <>
         <Topbar/>
@@ -268,7 +286,8 @@ export default function Game({player}) {
                     <li><button className='option-button' onClick={handleFlip}>Flip Board</button></li>
                     <li><button className='option-button' onClick={handleTakeback}>Takeback</button></li>
                     <li><button className='option-button' onClick={handleUndo}>Undo</button></li>
-                    <li><button className='option-button' onClick={handleRedo}>Redo</button></li>
+                    <li><button className='option-button' onClick={handleRedo} ref={redoRef}>Redo</button></li>
+                    <li><button className='option-button' onClick={handleRestart}>Restart</button></li>
                 </ul>
             </nav>
         </div>

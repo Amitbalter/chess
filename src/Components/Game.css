@@ -12,7 +12,7 @@
     aspect-ratio: 1;
     border: 5px solid;
     max-width: 500px;
-    
+    background-color: white;
 }
 
 .options ul{
@@ -26,8 +26,13 @@
 
 .option-button{
     color:rgb(0, 0, 0);
+    background-color: rgba(179, 132, 94, 0.425);
     text-decoration: none;
     aspect-ratio: 1;
     width:100%; 
+}
+
+.option-button:hover{
+    background-color: rgb(179, 132, 94);
 }
 
