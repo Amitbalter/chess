@@ -190,39 +190,7 @@ class board{
         }
     }
 
-    bestPosition(depth){
-        const possibleMoves = []
-        let values = []
-        for (let piece1 of this.pieces[this.turn%2]){
-            for (let move1 of piece1.moves){
-                const copy = this.replicate(this.turn)
-                const [i1,j1] = piece1.position
-                const [i2,j2] = [Number(move1[0]),Number(move1[1])]
-                const result1 = copy.makeMove(i1,j1,i2,j2)
-                possibleMoves.push([i1,j1,i2,j2])
-                if (result1 === 'checkmate'){
-                    values.push(1000) 
-                }
-                else {
-                    if (depth === 0){
-                        values.push(copy.valuation(this.turn))
-                    }
-                    else{
-                        values.push(-copy.bestPosition(depth-1)[1])
-                    }           
-                } 
-            }
-        }
-        const maxValue = Math.max(...values)
-        const bestMove = possibleMoves[values.indexOf(maxValue)]
-        return [bestMove,maxValue]
-    }
-
-    bestMove(depth){
-        return this.bestPosition(depth)[0]
-    }
-
-    valuation(turn){
+    valuation(){
         const values = {'P':1, 'N':3, 'B':3, 'R': 5, 'Q':9, 'K':0}
         let valuation = 0
         for (let k of [0,1]){
@@ -230,7 +198,7 @@ class board{
                 valuation += (1-2*k)*values[piece.label]
             }
         }
-        return valuation*(1-2*(turn%2))
+        return valuation
     }
 }
 

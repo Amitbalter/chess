@@ -8,6 +8,7 @@ import { pawn } from '../dynamics/pawn';
 import { rook } from '../dynamics/rook';
 import { bishop } from '../dynamics/bishop';
 import { knight } from '../dynamics/knight';
+import {bestMove} from '../dynamics/opponent'
 import './Game.css'
 
 export default function Game({computer}) {
@@ -19,6 +20,7 @@ export default function Game({computer}) {
     const redoRef = useRef(null)
 
     const colors = ['white','black']
+    const depth = 2
     const [flip, setFlip] = useState(computer ?? 1)
     const [i1, seti1] = useState(null)
     const [j1, setj1] = useState(null)
@@ -111,7 +113,7 @@ export default function Game({computer}) {
     }
 
     function generateMove(){
-        const move = gameBoard.bestMove(0)
+        const move = bestMove(gameBoard, depth)
         if (move){
             seti1(move[0])
             setj1(move[1])
