@@ -175,6 +175,7 @@ export default function Game({computer}) {
         dummyBoard.setupBoard()
         setGameBoard(dummyBoard) //updating with dummy board to trigger re-render
         setNext(1-next)
+        setFlip(computer ?? 1)
     },[restart])
 
     //coloring previous move in blue
@@ -225,6 +226,7 @@ export default function Game({computer}) {
             seti2(null)
             setj1(null)
             setj2(null)
+            if (computer === null) setFlip(1-flip)
         }
     },[i2,j2])
 

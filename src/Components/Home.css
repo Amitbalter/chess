@@ -1,13 +1,13 @@
 .navbar ul{
     list-style-type: none;
-    background-color: grey;
+    background-color:  rgba(203, 162, 92, 0.8);
     padding: 0px;
     max-width:600px;
     margin: auto;
   }
 
   .homepageLink{
-    color:white;
+    color:black;
     height: 50px;
     text-decoration: none;
     padding:15px;
@@ -17,5 +17,5 @@
   }
 
   .homepageLink:hover{
-    background-color: hsl(0, 0%, 10%);
+    background-color:  rgb(203, 162, 92);
   }
