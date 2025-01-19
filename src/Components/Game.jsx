@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Topbar from './Topbar';
-import {Link} from 'react-router-dom'
+import {Link, useParams} from 'react-router-dom'
 import Square from './Square';
 import Timer from './Timer';
 import { board } from '../dynamics/board';
@@ -12,7 +12,10 @@ import { knight } from '../dynamics/knight';
 import {bestMove} from '../dynamics/opponent'
 import './Game.css'
 
-export default function Game({computer}) {
+export default function Game() {
+    const {player,computer,time} = useParams()
+
+    // const [comp,setComp] = useState(computer === 'true' ? 1-player : null)
 
     const buttons = useRef(Array.from({length:8},( _ => [])))
     const addButtonRef = (ref, index) => {
@@ -21,8 +24,8 @@ export default function Game({computer}) {
     const redoRef = useRef(null)
 
     const colors = ['white','black']
-    const depth = 2
-    const [flip, setFlip] = useState(computer ?? 1)
+    const depth = 1
+    const [flip, setFlip] = useState(1-player)
     const [i1, seti1] = useState(null)
     const [j1, setj1] = useState(null)
     const [i2, seti2] = useState(null)
@@ -56,7 +59,7 @@ export default function Game({computer}) {
 
     function handleTakeback(){
         let dummyboard
-        if (computer === null && gameBoard.turn >= 1){
+        if (computer === 'false' && gameBoard.turn >= 1){
             dummyboard = gameBoard.replicate(gameBoard.turn - 1)
             delete gameBoard.history[gameBoard.turn]
             dummyboard.history = gameBoard.history
@@ -176,7 +179,6 @@ export default function Game({computer}) {
         dummyBoard.setupBoard()
         setGameBoard(dummyBoard) //updating with dummy board to trigger re-render
         setNext(1-next)
-        setFlip(computer ?? 1)
     },[restart])
 
     //coloring previous move in blue
@@ -190,19 +192,21 @@ export default function Game({computer}) {
     },[prev,i1,j1,flip])
 
     useEffect(()=>{
-        if (gameBoard.turn % 2 === computer){
+        if (computer === 'true' && gameBoard.turn % 2 !== Number(player)){
             generateMove()
         }
     },[next])
 
     //coloring current piece and moves in green if human move
     useEffect(() => {
-        if (i1!==null && j1!==null && gameBoard.turn % 2 !== computer){ 
-            let piece1 = gameBoard.array[i1][j1].piece
-            buttons.current[[i1,7-i1][flip]][[j1,7-j1][flip]].current.style.backgroundColor  = 'rgb(5, 136, 0)' 
-            for (let move of piece1.moves){
-                const [k,l] = [Number(move[0]),Number(move[1])]
-                buttons.current[[k,7-k][flip]][[l,7-l][flip]].current.style.backgroundColor = 'rgba(8, 141, 3, 0.75)'
+        if(computer === 'true' && gameBoard.turn % 2 === Number(player) || computer === 'false'){
+            if (i1!==null && j1!==null){ 
+                let piece1 = gameBoard.array[i1][j1].piece
+                buttons.current[[i1,7-i1][flip]][[j1,7-j1][flip]].current.style.backgroundColor  = 'rgb(5, 136, 0)' 
+                for (let move of piece1.moves){
+                    const [k,l] = [Number(move[0]),Number(move[1])]
+                    buttons.current[[k,7-k][flip]][[l,7-l][flip]].current.style.backgroundColor = 'rgba(8, 141, 3, 0.75)'
+                }
             }
         }
     },[i1,j1,flip])
@@ -227,7 +231,7 @@ export default function Game({computer}) {
             seti2(null)
             setj1(null)
             setj2(null)
-            // if (computer === null) setFlip(1-flip)
+            // if (comp === null) setFlip(1-flip)
         }
     },[i2,j2])
 
@@ -276,8 +280,8 @@ export default function Game({computer}) {
         <Topbar/>
         <div className='game'>
             <div className='left'>
-                <Timer turn = {gameBoard.turn} player = {1} time = {100}/>
-                <Timer turn = {gameBoard.turn} player = {0} time = {100}/>
+                <Timer turn = {gameBoard.turn} player = {1} time = {60*time}/>
+                <Timer turn = {gameBoard.turn} player = {0} time = {60*time}/>
             </div>
             <div className='board'>
                 {Array.from({length:8}).map((_, row) => (

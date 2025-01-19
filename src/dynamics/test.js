@@ -1,12 +1,5 @@
-let time = 3
-let k = 0
-console.log('start')
-const intervalID = setInterval(() => {
-    time --
-    console.log(time)
-    if (k === 0){
-        clearInterval(intervalID)
-    }
-    k--
-},1000)
+let computer = true
 
+let x = computer ? 0: 1
+
+console.log(x)

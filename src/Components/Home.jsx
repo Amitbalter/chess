@@ -4,16 +4,31 @@ import Topbar from './Topbar';
 import './Home.css'
 
 export default function Home(){
+    const [start,setStart] = useState(false)
+
+    const [player, setPlayer] = useState(null)
+    const [computer, setComputer] = useState(null)
+    const [time, setTime] = useState(null)
+
+    useEffect(() => {
+        if (player !== null && computer !== null && time !== null){
+            setStart(true)
+        }
+    },[player,computer,time])
 
     return(<div>
         <Topbar/>
-        <nav className='navbar'>
-        <ul>
-            <li><Link to='/gameWhite' className = 'homepageLink'>Play as White</Link></li>
-            <li><Link to='/gameBlack' className = 'homepageLink'> Play as Black</Link></li>
-            <li><Link to='/gameFriend' className = 'homepageLink'>Play with a friend</Link></li>
-        </ul>
-        </nav>
-    </div>)
+        <button onClick= {() => setPlayer(0)} className='homepageLink'>White</button>
+        <button onClick= {() => setPlayer(1)} className='homepageLink'>Black</button>
+        <button onClick= {() => setComputer(false)} className='homepageLink'>Human</button>
+        <button onClick= {() => setComputer(true)} className='homepageLink'>Computer</button>      
+        <button onClick= {() => setTime(1)} className='homepageLink'>1 minutes</button>      
+        <button onClick= {() => setTime(5)} className='homepageLink'>5 minutes</button>      
+        <button onClick= {() => setTime(10)} className='homepageLink'>10 minutes</button>      
+        {start ? (<Link to ={`game/${player}/${computer}/${time}`} className = 'homepageLink'>Start Game</Link>) :
+                (<button className = 'homepageLink'>Start Game</button>)
+                }
+        </div>)
     
 }
+

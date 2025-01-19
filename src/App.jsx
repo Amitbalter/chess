@@ -7,16 +7,13 @@ import Contact from './Components/Contact.jsx'
 import './App.css' 
 
 function App() {
-    
   return (
     <Router>
       <Routes>
         <Route path='/' element ={<Home/>}/>
-        <Route path= '/About' element = {<About/>}/>
-        <Route path= '/Contact' element = {<Contact/>}/>
-        <Route path='/gameWhite' element ={<Game computer = {1}/>}/>
-        <Route path='/gameBlack' element ={<Game computer = {0}/>}/>
-        <Route path='/gameFriend' element ={<Game computer = {null}/>}/>
+        <Route path= 'About' element = {<About/>}/>
+        <Route path= 'Contact' element = {<Contact/>}/>
+        <Route path='game/:player/:computer/:time' element ={<Game/>}/>
       </Routes>
     </Router>
   )
