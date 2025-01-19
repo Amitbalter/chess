@@ -1,41 +1,66 @@
 .game{
+    height: 600px;
+
     display: flex;
     flex-direction: row;
-    /* justify-content: center;
-    align-items: center;
-    margin-top: 100px;
-    height: 600px; */
-    /* border: 3px solid green; */
 }
 
 .board{
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-    grid-template-rows:    1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
-    /* aspect-ratio: 1; */
+    grid-template-columns: repeat(8,1fr);
+    grid-template-rows:    repeat(8,1fr);
+    
+    aspect-ratio: 1;
+
     border: 5px solid;
-    /* height: 100%; */
 }
 
-.options ul{
+.left{
+    flex: 1;
+
     display:flex;
     flex-direction: column;
-    justify-content: space-between;
-    list-style-type: none;
-    /* margin-left: 0px;
-    height:400px;
-    padding:0px; */
-    border:3px solid green;
+    justify-content: space-evenly;
+    padding-right: 50px;
+    align-items: flex-end;
 }
 
-.option-button{
+.right{
+    flex:1;
+
+    display:flex;
+    flex-direction: column;
+    padding-left: 50px;
+    justify-content: space-evenly;
+    
+}
+
+.timer{
+    width: 90px;
+    aspect-ratio: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
     color:rgb(0, 0, 0);
     background-color: rgba(203, 162, 92, 0.8);
     text-decoration: none;
-    aspect-ratio: 1;
-    width:100%; 
     border :none;
     border-radius: 10%;
+    font-size: x-large;
+}
+
+.option{
+    width: 90px;
+    aspect-ratio: 1;
+
+    color:rgb(0, 0, 0);
+    background-color: rgba(203, 162, 92, 0.8);
+    text-decoration: none;
+    border :none;
+    border-radius: 10%;
+    font-size: medium;
 }
 
 .option-button:hover{

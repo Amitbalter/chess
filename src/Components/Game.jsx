@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import Topbar from './Topbar';
 import {Link} from 'react-router-dom'
 import Square from './Square';
+import Timer from './Timer';
 import { board } from '../dynamics/board';
 import { king } from '../dynamics/king';
 import { pawn } from '../dynamics/pawn';
@@ -226,7 +227,7 @@ export default function Game({computer}) {
             seti2(null)
             setj1(null)
             setj2(null)
-            if (computer === null) setFlip(1-flip)
+            // if (computer === null) setFlip(1-flip)
         }
     },[i2,j2])
 
@@ -261,17 +262,23 @@ export default function Game({computer}) {
 
     useEffect(() => {
         if (undo + 2 <= Object.keys(gameBoard.history).length){
-            redoRef.current.style.backgroundColor = 'green'
+            redoRef.current.style.backgroundColor =  'rgba(8, 141, 3, 0.75)'
         }
         else{
             redoRef.current.style.backgroundColor = ''
         }
     },[undo])
 
+
+
     return (
         <>
         <Topbar/>
         <div className='game'>
+            <div className='left'>
+                <Timer turn = {gameBoard.turn} player = {1} time = {100}/>
+                <Timer turn = {gameBoard.turn} player = {0} time = {100}/>
+            </div>
             <div className='board'>
                 {Array.from({length:8}).map((_, row) => (
                     Array.from({length:8}).map((_, col) =>(
@@ -285,15 +292,13 @@ export default function Game({computer}) {
                         />
                     ))))}
             </div>
-            <nav className='options'>
-                <ul>
-                    <li><button className='option-button' onClick={handleFlip}>Flip Board</button></li>
-                    <li><button className='option-button' onClick={handleTakeback}>Takeback</button></li>
-                    <li><button className='option-button' onClick={handleUndo}>Undo</button></li>
-                    <li><button className='option-button' onClick={handleRedo} ref={redoRef}>Redo</button></li>
-                    <li><button className='option-button' onClick={handleRestart}>Restart</button></li>
-                </ul>
-            </nav>
+            <div className='right'>
+                <button className='option' onClick={handleFlip}>Flip Board</button>
+                <button className='option' onClick={handleTakeback}>Takeback</button>
+                <button className='option' onClick={handleUndo}>Undo</button>
+                <button className='option' onClick={handleRedo} ref={redoRef}>Redo</button>
+                <button className='option' onClick={handleRestart}>Restart</button>
+            </div>
         </div>
         </>
         

@@ -1,27 +1,27 @@
-.topbar ul{
-    list-style-type: none;
-    background-color: rgba(203, 162, 92, 0.8);
-    padding: 0px;
-    margin: 0px;
-    overflow: hidden;
-    width: fit-content;
+.topbar{
+    height: 60px;
+
+    display: flex;
+    flex-direction: row;
+    
+    margin-bottom: 50px;
 }
 
-.topbar_item{
+.topbar_link{
+    flex: 1;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+
     color:black;
     text-decoration: none;
-    padding-top: 15px;
-    padding-bottom: 15px;
-    padding-inline: 60px;
-    display: block;
-    text-align: center;
-    align-items: center;
+    background-color: rgba(203, 162, 92, 0.8);
+    font-size: x-large;
+
 }
 
-.topbar_item:hover{
+.topbar_link:hover{
     background-color: rgb(203, 162, 92); ;
-}
-
-.topbar li{
-    float: left;
 }
