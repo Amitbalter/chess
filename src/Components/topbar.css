@@ -1,27 +1,25 @@
-.topbar{
+.topbar {
     height: 60px;
 
     display: flex;
     flex-direction: row;
-    
+
     margin-bottom: 50px;
 }
 
-.topbar_link{
+.topbar_link {
     flex: 1;
 
     display: flex;
     justify-content: center;
     align-items: center;
-  
 
-    color:black;
+    color: black;
     text-decoration: none;
     background-color: rgba(203, 162, 92, 0.8);
     font-size: x-large;
-
 }
 
-.topbar_link:hover{
-    background-color: rgb(203, 162, 92); ;
+.topbar_link:hover {
+    background-color: rgb(203, 162, 92);
 }

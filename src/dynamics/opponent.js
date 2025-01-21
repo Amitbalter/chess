@@ -4,14 +4,13 @@ function bestPosition(board, depth) {
     const player = board.turn % 2;
     for (let piece1 of board.pieces[player]) {
         for (let move1 of piece1.moves) {
-            console.log(piece1, move1);
-            const copy = board.replicate(board.turn);
+            const copy = board.replicate();
             const [i1, j1] = piece1.position;
             const [i2, j2] = [Number(move1[0]), Number(move1[1])];
-            const result1 = copy.makeMove(i1, j1, i2, j2);
+            copy.makeMove(i1, j1, i2, j2);
             possibleMoves.push([i1, j1, i2, j2]);
-            if (result1 === "checkmate") {
-                values.push(1000 * (1 - 2 * player));
+            if (copy.state === "checkmate") {
+                values.push([1000, -1000][player]);
             } else {
                 if (depth === 0) {
                     values.push(copy.valuation());
@@ -21,7 +20,6 @@ function bestPosition(board, depth) {
             }
         }
     }
-
     if (player === 0) {
         const maxValue = Math.max(...values);
         const bestMove = possibleMoves[values.indexOf(maxValue)];

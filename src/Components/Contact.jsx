@@ -1,18 +1,17 @@
-import Topbar from "./Topbar"
-import React, { useEffect, useRef, useState } from 'react';
+import Topbar from "./Topbar";
+import React, { useEffect, useRef, useState } from "react";
 
-export default function Contact(){
-
-    return(
+export default function Contact() {
+    return (
         <div>
-            <Topbar/>
+            <Topbar />
             <p>
-                My name is Amit Balter 
-                <br/>
+                My name is Amit Balter
+                <br />
                 Phone: 07914 385 755
-                <br/>
+                <br />
                 Email: amitbaltern@gmail.com
             </p>
         </div>
-    )
+    );
 }

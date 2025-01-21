@@ -15,103 +15,83 @@ import "./Game.css";
 export default function Game() {
     const { player, computer, time } = useParams();
 
-    // const [comp,setComp] = useState(computer === 'true' ? 1-player : null)
+    const [boardColors, setBoardColors] = useState(Array(8).fill(Array(8).fill("")));
+    const [boardDisabled, setBoardDisabled] = useState(false);
+    const [flip, setFlip] = useState(1 - player);
+    const [redoColor, setRedoColor] = useState("");
 
-    const buttons = useRef(Array.from({ length: 8 }, (_) => []));
-    const addButtonRef = (ref, index) => {
-        buttons.current[index[0]][index[1]] = ref;
-    };
-    const redoRef = useRef(null);
+    const [gameBoard, setGameBoard] = useState(new board());
+    const [displayBoard, setDisplayBoard] = useState(new board());
 
     const colors = ["white", "black"];
-    const depth = 0;
-    const [flip, setFlip] = useState(1 - player);
+    const [depth, setDepth] = useState(2);
+
     const [i1, seti1] = useState(null);
     const [j1, setj1] = useState(null);
     const [i2, seti2] = useState(null);
     const [j2, setj2] = useState(null);
-    const [result, setResult] = useState(null);
     const [undo, setUndo] = useState(0);
-    const [gameBoard, setGameBoard] = useState(new board());
     const [prev, setPrev] = useState(null);
     const [next, setNext] = useState(0);
     const [restart, setRestart] = useState(0);
 
-    function handleFlip() {
-        setFlip(1 - flip);
-    }
-
     function resetColors() {
-        for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-                buttons.current[i][j].current.style.backgroundColor = "";
-            }
-        }
+        setBoardColors(Array(8).fill(Array(8).fill("")));
     }
 
-    function disableButtons(bool) {
-        for (let i = 0; i < 8; i++) {
-            for (let j = 0; j < 8; j++) {
-                buttons.current[i][j].current.disabled = bool;
-            }
-        }
+    function changeSquareColor(i, j, color) {
+        setBoardColors((boardColors) => {
+            const copyBoardColors = boardColors.map((row) => [...row]);
+            copyBoardColors[[i, 7 - i][flip]][[j, 7 - j][flip]] = color;
+            return copyBoardColors;
+        });
     }
 
     function handleTakeback() {
-        let dummyboard;
-        if (computer === "false" && gameBoard.turn >= 1) {
-            dummyboard = gameBoard.replicate(gameBoard.turn - 1);
-            delete gameBoard.history[gameBoard.turn];
-            dummyboard.history = gameBoard.history;
-            dummyboard.updateBoardMoves(dummyboard.turn % 2);
-            setGameBoard(dummyboard);
-            setPrev(dummyboard.lastMove);
-        } else if (gameBoard.turn >= 2) {
-            dummyboard = gameBoard.replicate(gameBoard.turn - 2);
-            delete gameBoard.history[gameBoard.turn];
-            delete gameBoard.history[gameBoard.turn - 1];
-            dummyboard.history = gameBoard.history;
-            dummyboard.updateBoardMoves(dummyboard.turn % 2);
-            setGameBoard(dummyboard);
-            setPrev(dummyboard.lastMove);
-        }
-        seti1(null);
-        seti2(null);
-        setj1(null);
-        setj2(null);
-        setResult(null);
+        // let dummyboard
+        // if (computer === 'false' && gameBoard.turn >= 1){
+        //     dummyboard = gameBoard.replicate(gameBoard.turn - 1)
+        //     delete gameBoard.history[gameBoard.turn]
+        //     dummyboard.history = gameBoard.history
+        //     dummyboard.updateBoardMoves(dummyboard.turn % 2)
+        //     setGameBoard(dummyboard)
+        //     setPrev(dummyboard.lastMove)
+        // }
+        // else if(gameBoard.turn >= 2 ){
+        //     dummyboard = gameBoard.replicate(gameBoard.turn - 2)
+        //     delete gameBoard.history[gameBoard.turn]
+        //     delete gameBoard.history[gameBoard.turn-1]
+        //     dummyboard.history = gameBoard.history
+        //     dummyboard.updateBoardMoves(dummyboard.turn % 2)
+        //     setGameBoard(dummyboard)
+        //     setPrev(dummyboard.lastMove)
+        // }
+        // seti1(null)
+        // seti2(null)
+        // setj1(null)
+        // setj2(null)
     }
 
     function handleUndo() {
         if (undo > 0) {
-            const dummyboard = gameBoard.replicate(undo - 1);
-            dummyboard.history = gameBoard.history;
-            setGameBoard(dummyboard);
-            disableButtons(true);
-            setPrev(dummyboard.lastMove);
+            setDisplayBoard(gameBoard.history[undo - 1]);
+            setPrev(gameBoard.history[undo - 1].lastMove);
+            setBoardDisabled(true);
             setUndo(undo - 1);
+            setRedoColor("rgba(8, 141, 3, 0.75)");
         }
     }
 
     function handleRedo() {
-        if (undo + 2 <= Object.keys(gameBoard.history).length) {
-            const dummyboard = gameBoard.replicate(undo + 1);
-            dummyboard.history = gameBoard.history;
-            if (undo + 2 === Object.keys(gameBoard.history).length) {
-                dummyboard.updateBoardMoves(dummyboard.turn % 2);
-                disableButtons(false);
+        if (undo + 1 <= gameBoard.turn) {
+            if (undo + 1 === gameBoard.turn) {
+                setBoardDisabled(false);
+                setRedoColor("");
             }
-            setGameBoard(dummyboard);
-            setPrev(dummyboard.lastMove);
+            setDisplayBoard(gameBoard.history[undo + 1]);
+            setPrev(gameBoard.history[undo + 1].lastMove);
             setUndo(undo + 1);
         }
-    }
-
-    function handleRestart() {
-        setRestart(restart + 1);
-        setResult(null);
-        setPrev(null);
-        disableButtons(false);
     }
 
     function generateMove() {
@@ -124,7 +104,7 @@ export default function Game() {
         }
     }
 
-    function setInput(_, index) {
+    function setInput(index) {
         const [i, j] = [index[0], index[1]];
         const row = [i, 7 - i][flip];
         const col = [j, 7 - j][flip];
@@ -161,26 +141,30 @@ export default function Game() {
     useEffect(() => {
         resetColors();
         const dummyBoard = new board();
-        // dummyBoard.setPiece(0, 3, new king('white'))
-        // dummyBoard.setPiece(3, 0, new bishop('white'))
-        // dummyBoard.setPiece(7, 3, new king('black'))
-        // dummyBoard.setPiece(6, 6, new knight('black'))
-        // dummyBoard.setPiece(4, 5, new knight('white'))
-        // dummyBoard.setPiece(3, 4, new pawn('black'))
-        // dummyBoard.setPiece(0, 5, new rook('white'))
-        // dummyBoard.history[0] = JSON.parse(JSON.stringify(dummyBoard))
-        // dummyBoard.updateBoardMoves(0)
+        // dummyBoard.setPiece(0, 3, new king("white"));
+        // dummyBoard.setPiece(3, 0, new bishop("white"));
+        // dummyBoard.setPiece(7, 3, new king("black"));
+        // dummyBoard.setPiece(6, 6, new knight("black"));
+        // dummyBoard.setPiece(4, 5, new knight("white"));
+        // dummyBoard.setPiece(3, 4, new pawn("black"));
+        // dummyBoard.setPiece(0, 5, new rook("white"));
+        // dummyBoard.history[0] = JSON.parse(JSON.stringify(dummyBoard));
+        // dummyBoard.updateBoardMoves(0);
         dummyBoard.setupBoard();
         setGameBoard(dummyBoard); //updating with dummy board to trigger re-render
         setNext(1 - next);
+        setBoardDisabled(false);
+        setRedoColor("");
+        setPrev(null);
+        setDisplayBoard(dummyBoard.history[0]);
     }, [restart]);
 
     //coloring previous move in blue
     useEffect(() => {
         resetColors();
         if (prev !== null) {
-            buttons.current[[prev[0], 7 - prev[0]][flip]][[prev[1], 7 - prev[1]][flip]].current.style.backgroundColor = "rgb(72, 111, 197)";
-            buttons.current[[prev[2], 7 - prev[2]][flip]][[prev[3], 7 - prev[3]][flip]].current.style.backgroundColor = "rgba(68, 114, 212, 0.78)";
+            changeSquareColor(prev[0], prev[1], "rgb(72, 111, 197)");
+            changeSquareColor(prev[2], prev[3], "rgba(68, 114, 212, 0.78)");
             setNext(1 - next);
         }
     }, [prev, i1, j1, flip]);
@@ -196,30 +180,21 @@ export default function Game() {
         if ((computer === "true" && gameBoard.turn % 2 === Number(player)) || computer === "false") {
             if (i1 !== null && j1 !== null) {
                 let piece1 = gameBoard.array[i1][j1].piece;
-                buttons.current[[i1, 7 - i1][flip]][[j1, 7 - j1][flip]].current.style.backgroundColor = "rgb(5, 136, 0)";
+                changeSquareColor(i1, j1, "rgb(5, 136, 0)");
                 for (let move of piece1.moves) {
                     const [k, l] = [Number(move[0]), Number(move[1])];
-                    buttons.current[[k, 7 - k][flip]][[l, 7 - l][flip]].current.style.backgroundColor = "rgba(8, 141, 3, 0.75)";
+                    changeSquareColor(k, l, "rgba(8, 141, 3, 0.75)");
                 }
             }
         }
     }, [i1, j1, flip]);
 
-    //coloring king in orange if in check
-    useEffect(() => {
-        if (gameBoard.check !== null) {
-            console.log("king is in check");
-            const [k, l] = gameBoard.pieces[gameBoard.turn % 2].find((piece) => piece.label === "K").position;
-            if (k !== i1 || l !== j1) {
-                buttons.current[[k, 7 - k][flip]][[l, 7 - l][flip]].current.style.backgroundColor = "rgb(218, 137, 33)";
-            }
-        }
-    }, [gameBoard.check, i1, j1, flip]);
-
     //making the move and updating the board according to the outcome
     useEffect(() => {
         if (i2 !== null && j2 !== null) {
-            setResult(gameBoard.makeMove(i1, j1, i2, j2));
+            gameBoard.makeMove(i1, j1, i2, j2);
+            setUndo(gameBoard.turn);
+            setDisplayBoard(gameBoard.history[gameBoard.turn]);
             setPrev([i1, j1, i2, j2]);
             seti1(null);
             seti2(null);
@@ -230,41 +205,38 @@ export default function Game() {
     }, [i2, j2]);
 
     useEffect(() => {
-        let king1 = gameBoard.pieces[gameBoard.turn % 2].find((piece) => piece.label === "K");
-        let king2 = gameBoard.pieces[(gameBoard.turn + 1) % 2].find((piece) => piece.label === "K");
+        let king1 = displayBoard.pieces[displayBoard.turn % 2].find((piece) => piece.label === "K");
+        let king2 = displayBoard.pieces[(displayBoard.turn + 1) % 2].find((piece) => piece.label === "K");
         if (king1 && king2) {
             let [k, l] = king1.position;
             let [m, n] = king2.position;
-            switch (result) {
+            switch (displayBoard.state) {
+                case "check":
+                    console.log("king is in check");
+                    if (k !== i1 || l !== j1) {
+                        changeSquareColor(k, l, "rgb(218, 137, 33)");
+                    }
+                    break;
                 case "checkmate":
                     console.log("checkmate");
-                    buttons.current[[k, 7 - k][flip]][[l, 7 - l][flip]].current.style.backgroundColor = "purple";
-                    disableButtons(true);
+                    changeSquareColor(k, l, "purple");
+                    setBoardDisabled(true);
                     break;
                 case "stalemate":
                     console.log("stalemate");
-                    buttons.current[[k, 7 - k][flip]][[l, 7 - l][flip]].current.style.backgroundColor = "pink";
-                    buttons.current[[m, 7 - m][flip]][[n, 7 - n][flip]].current.style.backgroundColor = "pink";
-                    disableButtons(true);
+                    changeSquareColor(k, l, "pink");
+                    changeSquareColor(m, n, "pink");
+                    setBoardDisabled(true);
                     break;
                 case "threefold":
                     console.log("threefold repetition");
-                    buttons.current[[k, 7 - k][flip]][[l, 7 - l][flip]].current.style.backgroundColor = "yellow";
-                    buttons.current[[m, 7 - m][flip]][[n, 7 - n][flip]].current.style.backgroundColor = "yellow";
-                    disableButtons(true);
+                    changeSquareColor(k, l, "yellow");
+                    changeSquareColor(m, n, "yellow");
+                    setBoardDisabled(true);
                     break;
             }
         }
-        setUndo(gameBoard.turn);
-    }, [gameBoard.turn, flip]);
-
-    useEffect(() => {
-        if (undo + 2 <= Object.keys(gameBoard.history).length) {
-            redoRef.current.style.backgroundColor = "rgba(8, 141, 3, 0.75)";
-        } else {
-            redoRef.current.style.backgroundColor = "";
-        }
-    }, [undo]);
+    }, [displayBoard.turn, displayBoard.state, i1, j1, flip]);
 
     return (
         <>
@@ -280,16 +252,17 @@ export default function Game() {
                             <Square
                                 key={[row, col]}
                                 index={[row, col]}
-                                addRef={addButtonRef}
-                                onFocus={setInput}
-                                piece={gameBoard.array[[row, 7 - row][flip]][[col, 7 - col][flip]].piece.label}
-                                color={gameBoard.array[[row, 7 - row][flip]][[col, 7 - col][flip]].piece.color}
+                                setInput={setInput}
+                                color={boardColors[row][col]}
+                                piece={displayBoard.array[[row, 7 - row][flip]][[col, 7 - col][flip]].piece.label}
+                                pieceColor={displayBoard.array[[row, 7 - row][flip]][[col, 7 - col][flip]].piece.color}
+                                disabled={boardDisabled}
                             />
                         ))
                     )}
                 </div>
                 <div className="right">
-                    <button className="option" onClick={handleFlip}>
+                    <button className="option" onClick={() => setFlip(1 - flip)}>
                         Flip Board
                     </button>
                     <button className="option" onClick={handleTakeback}>
@@ -298,10 +271,10 @@ export default function Game() {
                     <button className="option" onClick={handleUndo}>
                         Undo
                     </button>
-                    <button className="option" onClick={handleRedo} ref={redoRef}>
+                    <button className="option" onClick={handleRedo} style={{ backgroundColor: redoColor }}>
                         Redo
                     </button>
-                    <button className="option" onClick={handleRestart}>
+                    <button className="option" onClick={() => setRestart(restart + 1)}>
                         Restart
                     </button>
                 </div>
