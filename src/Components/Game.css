@@ -1,41 +1,40 @@
-.game{
-    height: 600px;
+.game {
+    height: 500px;
 
     display: flex;
     flex-direction: row;
 }
 
-.board{
+.board {
     display: grid;
-    grid-template-columns: repeat(8,1fr);
-    grid-template-rows:    repeat(8,1fr);
-    
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+
     aspect-ratio: 1;
 
     border: 5px solid;
 }
 
-.left{
+.left {
     flex: 1;
 
-    display:flex;
+    display: flex;
     flex-direction: column;
     justify-content: space-evenly;
     padding-right: 50px;
     align-items: flex-end;
 }
 
-.right{
-    flex:1;
+.right {
+    flex: 1;
 
-    display:flex;
+    display: flex;
     flex-direction: column;
     padding-left: 50px;
     justify-content: space-evenly;
-    
 }
 
-.timer{
+.timer {
     width: 90px;
     aspect-ratio: 1;
 
@@ -43,27 +42,26 @@
     justify-content: center;
     align-items: center;
 
-    color:rgb(0, 0, 0);
+    color: rgb(0, 0, 0);
     background-color: rgba(203, 162, 92, 0.8);
     text-decoration: none;
-    border :none;
+    border: none;
     border-radius: 10%;
     font-size: x-large;
 }
 
-.option{
+.option {
     width: 90px;
     aspect-ratio: 1;
 
-    color:rgb(0, 0, 0);
+    color: rgb(0, 0, 0);
     background-color: rgba(203, 162, 92, 0.8);
     text-decoration: none;
-    border :none;
+    border: none;
     border-radius: 10%;
     font-size: medium;
 }
 
-.option-button:hover{
+.option:hover {
     background-color: rgb(203, 162, 92);
 }
-

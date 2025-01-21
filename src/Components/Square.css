@@ -1,16 +1,16 @@
-.square_0{
-    background-color:  rgb(117, 78, 26);
+.square_0 {
+    background-color: rgb(117, 78, 26);
     border-radius: 0%;
     border-width: 0;
 }
 
-.square_1{
-    background-color:  rgba(203, 162, 92, 0.8);
+.square_1 {
+    background-color: rgba(203, 162, 92, 0.8);
     border-radius: 0%;
     border-width: 0;
 }
 
-.image{
+.image {
     width: 100%;
     height: auto;
     vertical-align: middle;
