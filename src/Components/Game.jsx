@@ -24,7 +24,7 @@ export default function Game() {
     const [displayBoard, setDisplayBoard] = useState(new board());
 
     const colors = ["white", "black"];
-    const [depth, setDepth] = useState(0);
+    const [depth, setDepth] = useState(2);
 
     const [i1, seti1] = useState(null);
     const [j1, setj1] = useState(null);
@@ -95,7 +95,9 @@ export default function Game() {
     }
 
     function generateMove() {
+        console.log("bestmove", 1, Date.now());
         const move = bestMove(gameBoard, depth);
+        console.log("bestmove", 2, Date.now());
         // const move = [6, 1, 5, 1];
         if (move) {
             seti1(move[0]);

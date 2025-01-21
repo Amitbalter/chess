@@ -31,7 +31,6 @@ class piece {
             copy.setPiece(4 - n, col, new empty());
         }
         copy.doMove(square1, square2);
-        // console.log('n'n)
         copy.updateBoardMoves(1 - n); //update moves of opposite color
         //check if king of same color in check
         if (!copy.kingInCheck(n)) {
@@ -43,8 +42,6 @@ class piece {
 
     legalmove(row, col, board) {
         if (this.color === ["white", "black"][board.turn % 2]) {
-            // console.log(this.color, board.turn);
-            // console.log("checking if exposes king");
             if (!this.exposesKing(row, col, board)) {
                 this.moves.push([row, col].join(""));
             }

@@ -83,14 +83,12 @@ class board {
     doMove(square1, square2) {
         const piece1 = square1.piece;
         const piece2 = square2.piece;
-
         //removing captured piece from the board
         if (piece2.label !== "") {
             const color = ["white", "black"].indexOf(piece2.color);
             const index = this.pieces[color].indexOf(piece2);
             this.pieces[color].splice(index, 1); //remove piece on square2 from board pieces
         }
-
         square2.piece = piece1; //move piece from square1 to square2
         piece1.position = square2.position; //update position of piece
         square1.piece = new empty(); //square1 is now empty
@@ -106,17 +104,12 @@ class board {
 
     replicate() {
         const copy = new board();
-        // const arrangement = JSON.parse(JSON.stringify(this));
-        // arrangement.history = [];
-        // copy.moves = [[], []];
         copy.turn = this.turn;
         copy.enPassant = [...this.enPassant];
         copy.state = this.state;
-        // copy.pieces = [[], []];
         copy.lastMove = this.lastMove;
         for (let k of [0, 1]) {
             for (let piece of this.pieces[k]) {
-                //arrangement.pieces[k]) {
                 const pieces = {
                     P: new pawn(piece.color),
                     N: new knight(piece.color),
@@ -176,6 +169,7 @@ class board {
             this.state = null;
             this.lastMove = [i1, j1, i2, j2];
 
+            this.moves = [[], []];
             this.updateBoardMoves((this.turn + 1) % 2);
             if (this.kingInCheck(this.turn % 2)) {
                 this.moves = [[], []];
@@ -187,9 +181,7 @@ class board {
                 }
             } else {
                 this.moves = [[], []];
-                console.log("makemove", 1, Date.now());
                 this.updateBoardMoves(this.turn % 2);
-                console.log("makemove", 2, Date.now());
                 if (this.moves[this.turn % 2].length === 0) {
                     this.state = "stalemate";
                 }
@@ -206,7 +198,7 @@ class board {
             if (repetition === 2) {
                 this.state = "threefold";
             }
-            this.moves = [[], []];
+
             const arrangement = JSON.parse(JSON.stringify(this));
             arrangement.history = [];
             this.history.push(arrangement);
@@ -214,15 +206,12 @@ class board {
     }
     //function that updates all the possible moves on the board
     updateBoardMoves(k) {
-        // console.log(`update${k}`, 1, Date.now());
         this.moves[k] = [];
         for (let piece of this.pieces[k]) {
-            // console.log(piece.label, piece.color);
             piece.updateMoves(this);
             this.moves[k] = this.moves[k].concat(piece.moves);
         }
         this.moves[k] = [...new Set(this.moves[k])];
-        // console.log(`update${k}`, 2, Date.now());
     }
 
     valuation() {
