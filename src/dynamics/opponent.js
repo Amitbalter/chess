@@ -26,7 +26,7 @@ function bestPosition(board, depth) {
             }
             // break;
         }
-        break;
+        // break;
     }
     // return [possibleMoves[0], 0];
     if (player === 0) {

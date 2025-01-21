@@ -106,16 +106,17 @@ class board {
 
     replicate() {
         const copy = new board();
-        const arrangement = JSON.parse(JSON.stringify(this));
+        // const arrangement = JSON.parse(JSON.stringify(this));
         // arrangement.history = [];
-        copy.moves = [[], []];
-        // copy.turn = arrangement.turn
-        // copy.enPassant = [...arrangement.enPassant]
-        // copy.check = arrangement.check
-        copy.pieces = [[], []];
-        // copy.lastMove = arrangement.lastMove
+        // copy.moves = [[], []];
+        copy.turn = this.turn;
+        copy.enPassant = [...this.enPassant];
+        copy.state = this.state;
+        // copy.pieces = [[], []];
+        copy.lastMove = this.lastMove;
         for (let k of [0, 1]) {
-            for (let piece of arrangement.pieces[k]) {
+            for (let piece of this.pieces[k]) {
+                //arrangement.pieces[k]) {
                 const pieces = {
                     P: new pawn(piece.color),
                     N: new knight(piece.color),
@@ -216,6 +217,7 @@ class board {
         // console.log(`update${k}`, 1, Date.now());
         this.moves[k] = [];
         for (let piece of this.pieces[k]) {
+            // console.log(piece.label, piece.color);
             piece.updateMoves(this);
             this.moves[k] = this.moves[k].concat(piece.moves);
         }

@@ -95,7 +95,7 @@ export default function Game() {
     }
 
     function generateMove() {
-        const move = bestMove(gameBoard, 0);
+        const move = bestMove(gameBoard, depth);
         // const move = [6, 1, 5, 1];
         if (move) {
             seti1(move[0]);
@@ -142,15 +142,15 @@ export default function Game() {
     useEffect(() => {
         resetColors();
         const dummyBoard = new board();
-        // dummyBoard.setPiece(0, 3, new king('white'))
-        // dummyBoard.setPiece(3, 0, new bishop('white'))
-        // dummyBoard.setPiece(7, 3, new king('black'))
-        // dummyBoard.setPiece(6, 6, new knight('black'))
-        // dummyBoard.setPiece(4, 5, new knight('white'))
-        // dummyBoard.setPiece(3, 4, new pawn('black'))
-        // dummyBoard.setPiece(0, 5, new rook('white'))
-        // dummyBoard.history[0] = JSON.parse(JSON.stringify(dummyBoard))
-        // dummyBoard.updateBoardMoves(0)
+        // dummyBoard.setPiece(0, 3, new king("white"));
+        // dummyBoard.setPiece(3, 0, new bishop("white"));
+        // dummyBoard.setPiece(7, 3, new king("black"));
+        // dummyBoard.setPiece(6, 6, new knight("black"));
+        // dummyBoard.setPiece(4, 5, new knight("white"));
+        // dummyBoard.setPiece(3, 4, new pawn("black"));
+        // dummyBoard.setPiece(0, 5, new rook("white"));
+        // dummyBoard.history[0] = JSON.parse(JSON.stringify(dummyBoard));
+        // dummyBoard.updateBoardMoves(0);
         dummyBoard.setupBoard();
         setGameBoard(dummyBoard); //updating with dummy board to trigger re-render
         setNext(1 - next);
@@ -193,6 +193,7 @@ export default function Game() {
     //making the move and updating the board according to the outcome
     useEffect(() => {
         if (i2 !== null && j2 !== null) {
+            console.log("game");
             gameBoard.makeMove(i1, j1, i2, j2);
             setUndo(gameBoard.turn);
             setDisplayBoard(gameBoard.history[gameBoard.turn]);
