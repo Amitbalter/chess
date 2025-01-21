@@ -94,6 +94,16 @@ class board {
         square1.piece = new empty(); //square1 is now empty
     }
 
+    //function that updates all the possible moves on the board
+    updateBoardMoves(k) {
+        this.moves[k] = [];
+        for (let piece of this.pieces[k]) {
+            piece.updateMoves(this);
+            this.moves[k] = this.moves[k].concat(piece.moves);
+        }
+        this.moves[k] = [...new Set(this.moves[k])];
+    }
+
     kingInCheck(color) {
         let kingPos = this.pieces[color % 2].find((piece) => piece.label === "K").position.join("");
         if (this.moves[(color + 1) % 2].includes(kingPos)) {
@@ -203,15 +213,6 @@ class board {
             arrangement.history = [];
             this.history.push(arrangement);
         }
-    }
-    //function that updates all the possible moves on the board
-    updateBoardMoves(k) {
-        this.moves[k] = [];
-        for (let piece of this.pieces[k]) {
-            piece.updateMoves(this);
-            this.moves[k] = this.moves[k].concat(piece.moves);
-        }
-        this.moves[k] = [...new Set(this.moves[k])];
     }
 
     valuation() {
