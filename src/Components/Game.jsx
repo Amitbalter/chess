@@ -95,10 +95,7 @@ export default function Game() {
     }
 
     function generateMove() {
-        console.log("bestmove", 1, Date.now());
         const move = bestMove(gameBoard, depth);
-        console.log("bestmove", 2, Date.now());
-        // const move = [6, 1, 5, 1];
         if (move) {
             seti1(move[0]);
             setj1(move[1]);
@@ -195,7 +192,6 @@ export default function Game() {
     //making the move and updating the board according to the outcome
     useEffect(() => {
         if (i2 !== null && j2 !== null) {
-            console.log("game");
             gameBoard.makeMove(i1, j1, i2, j2);
             setUndo(gameBoard.turn);
             setDisplayBoard(gameBoard.history[gameBoard.turn]);
