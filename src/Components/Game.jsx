@@ -24,7 +24,7 @@ export default function Game() {
     const [displayBoard, setDisplayBoard] = useState(new board());
 
     const colors = ["white", "black"];
-    const [depth, setDepth] = useState(2);
+    const [depth, setDepth] = useState(1);
 
     const [i1, seti1] = useState(null);
     const [j1, setj1] = useState(null);

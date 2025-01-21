@@ -1,8 +1,10 @@
 .game {
-    height: 500px;
+    height: 600px;
 
     display: flex;
     flex-direction: row;
+
+    margin-top: 50px;
 }
 
 .board {

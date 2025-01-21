@@ -19,34 +19,42 @@ export default function Home() {
     return (
         <div>
             <Topbar />
-            <button onClick={() => setPlayer(0)} className="homepageLink">
-                White
-            </button>
-            <button onClick={() => setPlayer(1)} className="homepageLink">
-                Black
-            </button>
-            <button onClick={() => setComputer(false)} className="homepageLink">
-                Human
-            </button>
-            <button onClick={() => setComputer(true)} className="homepageLink">
-                Computer
-            </button>
-            <button onClick={() => setTime(1)} className="homepageLink">
-                1 minutes
-            </button>
-            <button onClick={() => setTime(5)} className="homepageLink">
-                5 minutes
-            </button>
-            <button onClick={() => setTime(10)} className="homepageLink">
-                10 minutes
-            </button>
-            {start ? (
-                <Link to={`game/${player}/${computer}/${time}`} className="homepageLink">
-                    Start Game
-                </Link>
-            ) : (
-                <button className="homepageLink">Start Game</button>
-            )}
+            <div className="home_options">
+                <button onClick={() => setPlayer(0)} className="home_option">
+                    White
+                </button>
+                <button onClick={() => setPlayer(1)} className="home_option">
+                    Black
+                </button>
+            </div>
+            <div className="home_options">
+                <button onClick={() => setComputer(false)} className="home_option">
+                    Human
+                </button>
+                <button onClick={() => setComputer(true)} className="home_option">
+                    Computer
+                </button>
+            </div>
+            <div className="home_options">
+                <button onClick={() => setTime(1)} className="home_option">
+                    1 minutes
+                </button>
+                <button onClick={() => setTime(5)} className="home_option">
+                    5 minutes
+                </button>
+                <button onClick={() => setTime(10)} className="home_option">
+                    10 minutes
+                </button>
+            </div>
+            <div className="home_options">
+                {start ? (
+                    <Link to={`game/${player}/${computer}/${time}`} className="home_option">
+                        Start Game
+                    </Link>
+                ) : (
+                    <button className="home_option">Start Game</button>
+                )}
+            </div>
         </div>
     );
 }
