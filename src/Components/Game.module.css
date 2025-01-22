@@ -14,7 +14,8 @@
 
     aspect-ratio: 1;
 
-    border: 5px solid;
+    border: 10px solid;
+    border-radius: 2%;
 }
 
 .left {

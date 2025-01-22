@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import "./Square.css";
+import classes from "./Square.module.css";
 import whitePawn from "../assets/whitePawn.png";
 import whiteKnight from "../assets/whiteKnight.png";
 import whiteBishop from "../assets/whiteBishop.png";
@@ -34,22 +34,15 @@ const pieceImages = {
     "": { "": empty },
 };
 
-export default function Square({
-    index,
-    setInput,
-    color,
-    piece,
-    pieceColor,
-    disabled,
-}) {
+export default function Square({ index, setInput, color, piece, pieceColor, disabled }) {
     return (
         <button
-            className={`square_${(index[0] + index[1]) % 2}`}
+            className={(index[0] + index[1]) % 2 ? classes.square_0 : classes.square_1}
             onClick={() => setInput(index)}
             style={{ backgroundColor: color }}
             disabled={disabled}
         >
-            <img src={pieceImages[pieceColor][piece]} className="image" />
+            <img src={pieceImages[pieceColor][piece]} className={classes.image} />
         </button>
     );
 }

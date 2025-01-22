@@ -138,6 +138,40 @@ class board {
         return copy;
     }
 
+    restore(turn) {
+        const copy = new board();
+        const arrangement = this.history[turn];
+        copy.turn = arrangement.turn;
+        copy.enPassant = [...arrangement.enPassant];
+        copy.state = arrangement.state;
+        copy.lastMove = arrangement.lastMove;
+        for (let k of [0, 1]) {
+            for (let piece of arrangement.pieces[k]) {
+                const pieces = {
+                    P: new pawn(piece.color),
+                    N: new knight(piece.color),
+                    B: new bishop(piece.color),
+                    R: new rook(piece.color),
+                    Q: new queen(piece.color),
+                    K: new king(piece.color),
+                };
+                const copyPiece = pieces[piece.label];
+                copyPiece.castle = piece.castle;
+                copyPiece.position = [...piece.position];
+                copy.pieces[k].push(copyPiece);
+                copy.array[copyPiece.position[0]][copyPiece.position[1]].piece = copyPiece;
+            }
+        }
+        return copy;
+    }
+
+    revert(turns) {
+        const copy = this.restore(this.turn - turns);
+        copy.history = this.history.slice(0, -turns);
+        copy.updateBoardMoves(copy.turn % 2);
+        return copy;
+    }
+
     equal(arr) {
         if (JSON.stringify(this.enPassant) !== JSON.stringify(arr.enPassant)) {
             return false;

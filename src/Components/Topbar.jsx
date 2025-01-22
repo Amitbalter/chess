@@ -1,17 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import "./topbar.css";
+import classes from "./topbar.module.css";
 
 export default function Topbar() {
     return (
-        <nav className="topbar">
-            <Link to="/" className="topbar_link">
+        <nav className={classes.topbar}>
+            <Link to="/" className={classes.topbar_link}>
                 Home
             </Link>
-            <Link to="/About" className="topbar_link">
+            <Link to="/About" className={classes.topbar_link}>
                 About
             </Link>
-            <Link to="/Contact" className="topbar_link">
+            <Link to="/Contact" className={classes.topbar_link}>
                 Contact
             </Link>
         </nav>

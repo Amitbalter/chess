@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import classes from "./Game.module.css";
 
 export default function Timer({ turn, player, time }) {
     const timerRef = useRef(null);
@@ -32,7 +33,7 @@ export default function Timer({ turn, player, time }) {
 
     return (
         <div>
-            <div className="timer">
+            <div className={classes.timer}>
                 <p ref={timerRef}></p>
             </div>
         </div>

@@ -10,7 +10,7 @@ import { rook } from "../dynamics/rook";
 import { bishop } from "../dynamics/bishop";
 import { knight } from "../dynamics/knight";
 import { bestMove } from "../dynamics/opponent";
-import "./Game.css";
+import classes from "./Game.module.css";
 
 export default function Game() {
     const { player, computer, time } = useParams();
@@ -24,7 +24,7 @@ export default function Game() {
     const [displayBoard, setDisplayBoard] = useState(new board());
 
     const colors = ["white", "black"];
-    const [depth, setDepth] = useState(1);
+    const depth = 1;
 
     const [i1, seti1] = useState(null);
     const [j1, setj1] = useState(null);
@@ -47,29 +47,30 @@ export default function Game() {
         });
     }
 
+    function resetInputs() {
+        seti1(null);
+        seti2(null);
+        setj1(null);
+        setj2(null);
+    }
+
     function handleTakeback() {
-        // let dummyboard
-        // if (computer === 'false' && gameBoard.turn >= 1){
-        //     dummyboard = gameBoard.replicate(gameBoard.turn - 1)
-        //     delete gameBoard.history[gameBoard.turn]
-        //     dummyboard.history = gameBoard.history
-        //     dummyboard.updateBoardMoves(dummyboard.turn % 2)
-        //     setGameBoard(dummyboard)
-        //     setPrev(dummyboard.lastMove)
-        // }
-        // else if(gameBoard.turn >= 2 ){
-        //     dummyboard = gameBoard.replicate(gameBoard.turn - 2)
-        //     delete gameBoard.history[gameBoard.turn]
-        //     delete gameBoard.history[gameBoard.turn-1]
-        //     dummyboard.history = gameBoard.history
-        //     dummyboard.updateBoardMoves(dummyboard.turn % 2)
-        //     setGameBoard(dummyboard)
-        //     setPrev(dummyboard.lastMove)
-        // }
-        // seti1(null)
-        // seti2(null)
-        // setj1(null)
-        // setj2(null)
+        if (displayBoard.turn === gameBoard.turn) {
+            let turns;
+            if (computer === "false" && gameBoard.turn >= 1) {
+                turns = 1;
+            } else if (gameBoard.turn !== Number(player) && gameBoard.turn >= 2) {
+                turns = 2;
+            }
+            if (turns) {
+                const dummyboard = gameBoard.revert(turns);
+                setGameBoard(dummyboard);
+                setDisplayBoard(dummyboard);
+                resetInputs();
+                setPrev(dummyboard.lastMove);
+                setUndo(undo - turns);
+            }
+        }
     }
 
     function handleUndo() {
@@ -79,6 +80,7 @@ export default function Game() {
             setBoardDisabled(true);
             setUndo(undo - 1);
             setRedoColor("rgba(8, 141, 3, 0.75)");
+            resetInputs();
         }
     }
 
@@ -91,6 +93,7 @@ export default function Game() {
             setDisplayBoard(gameBoard.history[undo + 1]);
             setPrev(gameBoard.history[undo + 1].lastMove);
             setUndo(undo + 1);
+            resetInputs();
         }
     }
 
@@ -164,7 +167,7 @@ export default function Game() {
         resetColors();
         if (prev !== null) {
             changeSquareColor(prev[0], prev[1], "rgb(72, 111, 197)");
-            changeSquareColor(prev[2], prev[3], "rgba(68, 114, 212, 0.78)");
+            changeSquareColor(prev[2], prev[3], "rgba(68, 114, 212, 0.8)");
             setNext(1 - next);
         }
     }, [prev, i1, j1, flip]);
@@ -201,6 +204,9 @@ export default function Game() {
             setj1(null);
             setj2(null);
             // if (comp === null) setFlip(1-flip)
+        }
+        if (computer === "true") {
+            setBoardDisabled(gameBoard.turn % 2 !== Number(player));
         }
     }, [i2, j2]);
 
@@ -241,12 +247,12 @@ export default function Game() {
     return (
         <>
             <Topbar />
-            <div className="game">
-                <div className="left">
+            <div className={classes.game}>
+                <div className={classes.left}>
                     <Timer turn={gameBoard.turn} player={1} time={60 * time} />
                     <Timer turn={gameBoard.turn} player={0} time={60 * time} />
                 </div>
-                <div className="board">
+                <div className={classes.board}>
                     {Array.from({ length: 8 }).map((_, row) =>
                         Array.from({ length: 8 }).map((_, col) => (
                             <Square
@@ -261,20 +267,20 @@ export default function Game() {
                         ))
                     )}
                 </div>
-                <div className="right">
-                    <button className="option" onClick={() => setFlip(1 - flip)}>
+                <div className={classes.right}>
+                    <button className={classes.option} onClick={() => setFlip(1 - flip)}>
                         Flip Board
                     </button>
-                    <button className="option" onClick={handleTakeback}>
+                    <button className={classes.option} onClick={handleTakeback}>
                         Takeback
                     </button>
-                    <button className="option" onClick={handleUndo}>
+                    <button className={classes.option} onClick={handleUndo}>
                         Undo
                     </button>
-                    <button className="option" onClick={handleRedo} style={{ backgroundColor: redoColor }}>
+                    <button className={classes.option} onClick={handleRedo} style={{ backgroundColor: redoColor }}>
                         Redo
                     </button>
-                    <button className="option" onClick={() => setRestart(restart + 1)}>
+                    <button className={classes.option} onClick={() => setRestart(restart + 1)}>
                         Restart
                     </button>
                 </div>
