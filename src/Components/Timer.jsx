@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import classes from "./Game.module.css";
+import classes from "./Timer.module.css";
 
 export default function Timer({ turn, player, time, setTime }) {
     function displayTime(t) {

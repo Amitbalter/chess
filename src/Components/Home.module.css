@@ -47,4 +47,5 @@
 
 .option:hover {
     background-color: rgb(203, 162, 92);
+    cursor: pointer;
 }

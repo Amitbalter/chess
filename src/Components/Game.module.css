@@ -34,28 +34,26 @@
     display: flex;
     flex-direction: column;
     padding-left: 50px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+
     justify-content: space-evenly;
 }
 
-.timer {
-    width: 90px;
-    aspect-ratio: 1;
+.options {
+    flex: 1;
+    width: 300px;
+    aspect-ratio: 3/2;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    color: rgb(0, 0, 0);
-    background-color: rgba(203, 162, 92, 0.8);
-    text-decoration: none;
-    border: none;
-    border-radius: 10%;
-    font-size: x-large;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: end;
 }
 
 .option {
-    width: 90px;
     aspect-ratio: 1;
+    width: 90px;
+    justify-self: center;
 
     color: rgb(0, 0, 0);
     background-color: rgba(203, 162, 92, 0.8);
@@ -67,6 +65,7 @@
 
 .option:hover {
     background-color: rgb(203, 162, 92);
+    cursor: pointer;
 }
 
 .console {

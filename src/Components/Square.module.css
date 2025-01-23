@@ -1,12 +1,11 @@
 .square_0 {
-    /* background-color: rgb(117, 78, 26); */
-    background-color: rgb(248, 225, 183);
+    background-color: rgba(203, 162, 92, 0.8);
     border-radius: 0%;
     border-width: 0;
 }
 
 .square_1 {
-    background-color: rgba(203, 162, 92, 0.8);
+    background-color: rgb(248, 225, 183);
     border-radius: 0%;
     border-width: 0;
 }
@@ -15,4 +14,12 @@
     width: 100%;
     height: auto;
     vertical-align: middle;
+}
+
+.square_0:hover {
+    cursor: pointer;
+}
+
+.square_1:hover {
+    cursor: pointer;
 }

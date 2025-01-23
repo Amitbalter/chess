@@ -1,0 +1,36 @@
+.moves {
+    flex: 2;
+    width: 300px;
+    padding-top: 10px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+
+    color: rgb(0, 0, 0);
+    background-color: rgba(203, 162, 92, 0.8);
+    text-decoration: none;
+    border: none;
+    border-radius: 5%;
+    font-size: medium;
+}
+
+.move {
+    height: 30px;
+    width: 100%;
+    /* border: 2px solid green; */
+    padding-left: 10px;
+
+    display: flex;
+    align-items: center;
+
+    font-size: large;
+}
+
+.turn {
+    flex: 1;
+}
+
+.submove {
+    flex: 3;
+}

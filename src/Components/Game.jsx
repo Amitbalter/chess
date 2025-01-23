@@ -3,6 +3,7 @@ import Topbar from "./Topbar";
 import { Link, useParams } from "react-router-dom";
 import Square from "./Square";
 import Timer from "./Timer";
+import Moves from "./Moves";
 import { board } from "../dynamics/board";
 import { king } from "../dynamics/king";
 import { pawn } from "../dynamics/pawn";
@@ -283,21 +284,33 @@ export default function Game() {
                     )}
                 </div>
                 <div className={classes.right}>
-                    <button className={classes.option} onClick={() => setFlip(1 - flip)}>
-                        Flip Board
-                    </button>
-                    <button className={classes.option} onClick={handleTakeback}>
-                        Takeback
-                    </button>
-                    <button className={classes.option} onClick={handleUndo}>
-                        Undo
-                    </button>
-                    <button className={classes.option} onClick={handleRedo} style={{ backgroundColor: redoColor }}>
-                        Redo
-                    </button>
-                    <button className={classes.option} onClick={() => setRestart(restart + 1)}>
-                        Restart
-                    </button>
+                    <Moves game={gameBoard} />
+                    <div className={classes.options}>
+                        <button className={classes.option} onClick={handleTakeback}>
+                            Takeback
+                        </button>
+                        <button className={classes.option} onClick={handleUndo}>
+                            Undo
+                        </button>
+                        <button className={classes.option} onClick={handleRedo} style={{ backgroundColor: redoColor }}>
+                            Redo
+                        </button>
+                        <button className={classes.option} onClick={() => setFlip(1 - flip)}>
+                            Flip Board
+                        </button>
+                        <button className={classes.option} onClick={() => setRestart(restart + 1)}>
+                            Restart
+                        </button>
+                        <button
+                            className={classes.option}
+                            onClick={() => {
+                                setMessage(`${colors[player]} resigns, game is over`);
+                                setRestart(restart + 1);
+                            }}
+                        >
+                            Resign
+                        </button>
+                    </div>
                 </div>
             </div>
             <div className={classes.console}>
