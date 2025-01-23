@@ -13,18 +13,20 @@ import { bestMove } from "../dynamics/opponent";
 import classes from "./Game.module.css";
 
 export default function Game() {
-    const { player, computer, time } = useParams();
+    const { player, computer, timeLimit, depth } = useParams();
 
     const [boardColors, setBoardColors] = useState(Array(8).fill(Array(8).fill("")));
     const [boardDisabled, setBoardDisabled] = useState(false);
     const [flip, setFlip] = useState(1 - player);
     const [redoColor, setRedoColor] = useState("");
+    const [message, setMessage] = useState("");
+    const [time1, setTime1] = useState(60 * timeLimit);
+    const [time2, setTime2] = useState(60 * timeLimit);
 
     const [gameBoard, setGameBoard] = useState(new board());
     const [displayBoard, setDisplayBoard] = useState(new board());
 
     const colors = ["white", "black"];
-    const depth = 1;
 
     const [i1, seti1] = useState(null);
     const [j1, setj1] = useState(null);
@@ -59,7 +61,7 @@ export default function Game() {
             let turns;
             if (computer === "false" && gameBoard.turn >= 1) {
                 turns = 1;
-            } else if (gameBoard.turn !== Number(player) && gameBoard.turn >= 2) {
+            } else if (gameBoard.turn % 2 === Number(player) && gameBoard.turn >= 2) {
                 turns = 2;
             }
             if (turns) {
@@ -98,7 +100,7 @@ export default function Game() {
     }
 
     function generateMove() {
-        const move = bestMove(gameBoard, depth);
+        const move = bestMove(gameBoard, Number(depth));
         if (move) {
             seti1(move[0]);
             setj1(move[1]);
@@ -117,8 +119,9 @@ export default function Game() {
             if (gameBoard.array[row][col].piece.color === colors[gameBoard.turn % 2]) {
                 seti1(row);
                 setj1(col);
+                setMessage("");
             } else {
-                console.log(`It is ${colors[gameBoard.turn % 2]}'s turn to play`);
+                setMessage(`It is ${colors[gameBoard.turn % 2]}'s turn to play`);
             }
         }
         //if second square is same piece of same colour then change input1 to new piece
@@ -158,7 +161,10 @@ export default function Game() {
         setNext(1 - next);
         setBoardDisabled(false);
         setRedoColor("");
+        setMessage("");
         setPrev(null);
+        setTime1(60 * timeLimit);
+        setTime2(60 * timeLimit);
         setDisplayBoard(dummyBoard.history[0]);
     }, [restart]);
 
@@ -199,10 +205,8 @@ export default function Game() {
             setUndo(gameBoard.turn);
             setDisplayBoard(gameBoard.history[gameBoard.turn]);
             setPrev([i1, j1, i2, j2]);
-            seti1(null);
-            seti2(null);
-            setj1(null);
-            setj2(null);
+            resetInputs();
+            setMessage("");
             // if (comp === null) setFlip(1-flip)
         }
         if (computer === "true") {
@@ -218,24 +222,24 @@ export default function Game() {
             let [m, n] = king2.position;
             switch (displayBoard.state) {
                 case "check":
-                    console.log("king is in check");
+                    setMessage(`The ${king1.color} king is in check`);
                     if (k !== i1 || l !== j1) {
                         changeSquareColor(k, l, "rgb(218, 137, 33)");
                     }
                     break;
                 case "checkmate":
-                    console.log("checkmate");
+                    setMessage(`Checkmate, ${king2.color} wins`);
                     changeSquareColor(k, l, "purple");
                     setBoardDisabled(true);
                     break;
                 case "stalemate":
-                    console.log("stalemate");
+                    setMessage("Stalemate");
                     changeSquareColor(k, l, "pink");
                     changeSquareColor(m, n, "pink");
                     setBoardDisabled(true);
                     break;
                 case "threefold":
-                    console.log("threefold repetition");
+                    setMessage("Threefold repetition");
                     changeSquareColor(k, l, "yellow");
                     changeSquareColor(m, n, "yellow");
                     setBoardDisabled(true);
@@ -249,8 +253,19 @@ export default function Game() {
             <Topbar />
             <div className={classes.game}>
                 <div className={classes.left}>
-                    <Timer turn={gameBoard.turn} player={1} time={60 * time} />
-                    <Timer turn={gameBoard.turn} player={0} time={60 * time} />
+                    {timeLimit !== "false" ? (
+                        <>
+                            <Timer turn={gameBoard.turn} player={[0, 1][flip]} time={[time1, time2][flip]} setTime={[setTime1, setTime2][flip]} />
+                            <Timer
+                                turn={gameBoard.turn}
+                                player={[0, 1][1 - flip]}
+                                time={[time1, time2][1 - flip]}
+                                setTime={[setTime1, setTime2][1 - flip]}
+                            />
+                        </>
+                    ) : (
+                        <></>
+                    )}
                 </div>
                 <div className={classes.board}>
                     {Array.from({ length: 8 }).map((_, row) =>
@@ -284,6 +299,9 @@ export default function Game() {
                         Restart
                     </button>
                 </div>
+            </div>
+            <div className={classes.console}>
+                <p className={classes.message}>{`${message}`}</p>
             </div>
         </>
     );

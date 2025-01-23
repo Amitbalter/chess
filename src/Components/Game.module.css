@@ -68,3 +68,21 @@
 .option:hover {
     background-color: rgb(203, 162, 92);
 }
+
+.console {
+    width: 300px;
+    height: 100px;
+    margin: auto;
+    margin-top: 50px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgba(203, 162, 92, 0.8);
+    border-radius: 2%;
+}
+
+.message {
+    font-size: large;
+}

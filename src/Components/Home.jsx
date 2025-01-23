@@ -7,7 +7,8 @@ export default function Home() {
     const [start, setStart] = useState(false);
     const [player, setPlayer] = useState(null);
     const [computer, setComputer] = useState(null);
-    const [time, setTime] = useState(null);
+    const [depth, setDepth] = useState(null);
+    const [timeLimit, setTimeLimit] = useState(null);
     const colorOn = "rgba(8, 141, 3, 0.75)";
 
     function changeOptionColor(variable, value) {
@@ -15,10 +16,12 @@ export default function Home() {
     }
 
     useEffect(() => {
-        if (player !== null && computer !== null && time !== null) {
-            setStart(true);
+        if (player !== null && timeLimit !== null) {
+            if (computer === true && depth !== null) setStart(true);
+            else if (computer === false) setStart(true);
+            else setStart(false);
         }
-    }, [player, computer, time]);
+    }, [player, computer, timeLimit, depth]);
 
     return (
         <div>
@@ -32,27 +35,52 @@ export default function Home() {
                 </button>
             </div>
             <div className={classes.options}>
-                <button onClick={() => setComputer(false)} className={classes.option} style={changeOptionColor(computer, false)}>
+                <button
+                    onClick={() => {
+                        setComputer(false);
+                        setDepth(null);
+                    }}
+                    className={classes.option}
+                    style={changeOptionColor(computer, false)}
+                >
                     Human
                 </button>
                 <button onClick={() => setComputer(true)} className={classes.option} style={changeOptionColor(computer, true)}>
                     Computer
                 </button>
             </div>
+            {computer ? (
+                <div className={classes.options}>
+                    <button onClick={() => setDepth(0)} className={classes.option} style={changeOptionColor(depth, 0)}>
+                        Easy
+                    </button>
+                    <button onClick={() => setDepth(1)} className={classes.option} style={changeOptionColor(depth, 1)}>
+                        Medium
+                    </button>
+                    <button onClick={() => setDepth(2)} className={classes.option} style={changeOptionColor(depth, 2)}>
+                        Hard
+                    </button>
+                </div>
+            ) : (
+                <></>
+            )}
             <div className={classes.options}>
-                <button onClick={() => setTime(1)} className={classes.option} style={changeOptionColor(time, 1)}>
+                <button onClick={() => setTimeLimit(false)} className={classes.option} style={changeOptionColor(timeLimit, false)}>
+                    No limit
+                </button>
+                <button onClick={() => setTimeLimit(1)} className={classes.option} style={changeOptionColor(timeLimit, 1)}>
                     1 minute
                 </button>
-                <button onClick={() => setTime(5)} className={classes.option} style={changeOptionColor(time, 5)}>
+                <button onClick={() => setTimeLimit(5)} className={classes.option} style={changeOptionColor(timeLimit, 5)}>
                     5 minutes
                 </button>
-                <button onClick={() => setTime(10)} className={classes.option} style={changeOptionColor(time, 10)}>
+                <button onClick={() => setTimeLimit(10)} className={classes.option} style={changeOptionColor(timeLimit, 10)}>
                     10 minutes
                 </button>
             </div>
             <div className={classes.options}>
                 {start ? (
-                    <Link to={`game/${player}/${computer}/${time}`} className={classes.link} style={{ backgroundColor: colorOn }}>
+                    <Link to={`game/${player}/${computer}/${timeLimit}/${depth}`} className={classes.link} style={{ backgroundColor: colorOn }}>
                         Start Game
                     </Link>
                 ) : (

@@ -13,7 +13,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="About" element={<About />} />
                 <Route path="Contact" element={<Contact />} />
-                <Route path="game/:player/:computer/:time" element={<Game />} />
+                <Route path="game/:player/:computer/:timeLimit/:depth" element={<Game />} />
             </Routes>
         </Router>
     );

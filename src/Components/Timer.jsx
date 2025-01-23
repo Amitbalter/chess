@@ -1,32 +1,25 @@
 import React, { useEffect, useRef, useState } from "react";
 import classes from "./Game.module.css";
 
-export default function Timer({ turn, player, time }) {
-    const timerRef = useRef(null);
-    const [timer, setTimer] = useState(time - 1);
-
-    function displayTime(time) {
-        const minutes = Math.floor(time / 60);
-        const seconds = time % 60;
-        timerRef.current.innerText = minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
+export default function Timer({ turn, player, time, setTime }) {
+    function displayTime(t) {
+        const minutes = Math.floor(t / 60);
+        const seconds = t % 60;
+        return minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
     }
-    useEffect(() => {
-        displayTime(time);
-    }, []);
 
     useEffect(() => {
         let counter = 0;
         if (turn % 2 === player) {
             const intervalID = setInterval(() => {
-                if (timer - counter >= 0) {
-                    displayTime(timer - counter);
+                if (time - counter > 0) {
                     counter++;
+                    setTime(time - counter);
                 }
             }, 1000);
 
             return () => {
                 clearInterval(intervalID);
-                setTimer(timer - counter);
             };
         }
     }, [turn]);
@@ -34,7 +27,7 @@ export default function Timer({ turn, player, time }) {
     return (
         <div>
             <div className={classes.timer}>
-                <p ref={timerRef}></p>
+                <p>{displayTime(time)}</p>
             </div>
         </div>
     );
