@@ -1,23 +1,23 @@
 .moves {
     flex: 2;
     width: 300px;
-    padding-top: 10px;
+    padding-top: 20px;
 
     display: flex;
     flex-direction: column;
-    align-items: start;
+    /* align-items: start; */
 
-    color: rgb(0, 0, 0);
+    /* color: rgb(0, 0, 0); */
     background-color: rgba(203, 162, 92, 0.8);
     text-decoration: none;
-    border: 3px solid green;
+    /* border: 3px solid green; */
     border-radius: 5%;
     font-size: medium;
 }
 
 .move {
     height: 30px;
-    width: 100%;
+    /* width: 100%; */
     /* border: 2px solid green; */
     padding-left: 10px;
 
@@ -31,13 +31,18 @@
     flex: 1;
 }
 
-.submove {
-    flex: 4;
+.submove,
+.blankmove {
+    flex: 3;
     height: 100%;
     width: auto;
     border: None;
     background-color: transparent;
     font-size: large;
+
+    display: flex;
+    align-items: center;
+    justify-content: start;
 }
 
 .submove:hover {
