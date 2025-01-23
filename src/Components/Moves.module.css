@@ -10,7 +10,7 @@
     color: rgb(0, 0, 0);
     background-color: rgba(203, 162, 92, 0.8);
     text-decoration: none;
-    border: none;
+    border: 3px solid green;
     border-radius: 5%;
     font-size: medium;
 }
@@ -32,5 +32,15 @@
 }
 
 .submove {
-    flex: 3;
+    flex: 4;
+    height: 100%;
+    width: auto;
+    border: None;
+    background-color: transparent;
+    font-size: large;
+}
+
+.submove:hover {
+    cursor: pointer;
+    background-color: rgba(203, 162, 92);
 }

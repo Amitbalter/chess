@@ -2,5 +2,6 @@ To do:
 
 message needs to change after computer move
 deal with promotion
-log of board moves
 timers need to restart with restart
+
+add functionality to buttons of move log, fix overflowing issue

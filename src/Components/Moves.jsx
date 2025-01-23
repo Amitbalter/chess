@@ -16,13 +16,16 @@ export default function Moves({ game }) {
                     2 * index + 1 === game.turn ? (
                         <div className={classes.move}>
                             <p className={classes.turn}>{index + 1} &nbsp;</p>
-                            <p className={classes.submove}>{`${moves[2 * index][0]} ${moves[2 * index][1]}${moves[2 * index][2]}`}</p>
+                            <button className={classes.submove}>{`${moves[2 * index][0]} ${moves[2 * index][1]}${moves[2 * index][2]}`}</button>
+                            <button className={classes.submove}></button>
                         </div>
                     ) : (
                         <div className={classes.move}>
                             <p className={classes.turn}>{index + 1} &nbsp;</p>
-                            <p className={classes.submove}>{`${moves[2 * index][0]} ${moves[2 * index][1]}${moves[2 * index][2]}`}</p>
-                            <p className={classes.submove}>{`${moves[2 * index + 1][0]} ${moves[2 * index + 1][1]}${moves[2 * index + 1][2]}`}</p>
+                            <button className={classes.submove}>{`${moves[2 * index][0]} ${moves[2 * index][1]}${moves[2 * index][2]}`}</button>
+                            <button className={classes.submove}>{`${moves[2 * index + 1][0]} ${moves[2 * index + 1][1]}${
+                                moves[2 * index + 1][2]
+                            }`}</button>
                         </div>
                     )
                 )}
