@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
-import Topbar from "./Topbar";
 import { Link, useParams } from "react-router-dom";
+import Topbar from "./Topbar";
 import Square from "./Square";
-import Timer from "./Timer";
+import Clock from "./Clock";
 import MoveLog from "./MoveLog";
 import { board } from "../dynamics/board";
 import { king } from "../dynamics/king";
@@ -21,8 +21,6 @@ export default function Game() {
     const [flip, setFlip] = useState(1 - player);
     const [redoColor, setRedoColor] = useState("");
     const [message, setMessage] = useState("");
-    const [time1, setTime1] = useState(60 * timeLimit);
-    const [time2, setTime2] = useState(60 * timeLimit);
 
     const [gameBoard, setGameBoard] = useState(new board());
     const [displayBoard, setDisplayBoard] = useState(new board());
@@ -34,7 +32,6 @@ export default function Game() {
     const [i2, seti2] = useState(null);
     const [j2, setj2] = useState(null);
     const [undo, setUndo] = useState(0);
-    const [prev, setPrev] = useState(null);
     const [next, setNext] = useState(0);
     const [restart, setRestart] = useState(0);
 
@@ -57,7 +54,7 @@ export default function Game() {
         setj2(null);
     }
 
-    function handleTakeback() {
+    function takeback() {
         if (displayBoard.turn === gameBoard.turn) {
             let turns;
             if (computer === "false" && gameBoard.turn >= 1) {
@@ -69,35 +66,14 @@ export default function Game() {
                 const dummyboard = gameBoard.revert(turns);
                 setGameBoard(dummyboard);
                 setDisplayBoard(dummyboard);
-                resetInputs();
-                setPrev(dummyboard.lastMove);
                 setUndo(undo - turns);
             }
         }
     }
 
-    function handleUndo() {
-        if (undo > 0) {
-            setDisplayBoard(gameBoard.history[undo - 1]);
-            setPrev(gameBoard.history[undo - 1].lastMove);
-            setBoardDisabled(true);
-            setUndo(undo - 1);
-            setRedoColor("rgba(8, 141, 3, 0.75)");
-            resetInputs();
-        }
-    }
-
-    function handleRedo() {
-        if (undo + 1 <= gameBoard.turn) {
-            if (undo + 1 === gameBoard.turn) {
-                setBoardDisabled(false);
-                setRedoColor("");
-            }
-            setDisplayBoard(gameBoard.history[undo + 1]);
-            setPrev(gameBoard.history[undo + 1].lastMove);
-            setUndo(undo + 1);
-            resetInputs();
-        }
+    function reCreate(turn) {
+        setDisplayBoard(gameBoard.history[turn]);
+        setUndo(turn);
     }
 
     function generateMove() {
@@ -163,21 +139,19 @@ export default function Game() {
         setBoardDisabled(false);
         setRedoColor("");
         setMessage("");
-        setPrev(null);
-        setTime1(60 * timeLimit);
-        setTime2(60 * timeLimit);
         setDisplayBoard(dummyBoard.history[0]);
     }, [restart]);
 
     //coloring previous move in blue
     useEffect(() => {
         resetColors();
+        let prev = displayBoard.lastMove;
         if (prev !== null) {
             changeSquareColor(prev[0], prev[1], "rgb(72, 111, 197)");
             changeSquareColor(prev[2], prev[3], "rgba(68, 114, 212, 0.8)");
             setNext(1 - next);
         }
-    }, [prev, i1, j1, flip]);
+    }, [displayBoard.lastMove, i1, j1, flip]);
 
     useEffect(() => {
         if (computer === "true" && gameBoard.turn % 2 !== Number(player)) {
@@ -205,7 +179,6 @@ export default function Game() {
             gameBoard.makeMove(i1, j1, i2, j2);
             setUndo(gameBoard.turn);
             setDisplayBoard(gameBoard.history[gameBoard.turn]);
-            setPrev([i1, j1, i2, j2]);
             resetInputs();
             setMessage("");
             // if (comp === null) setFlip(1-flip)
@@ -249,24 +222,23 @@ export default function Game() {
         }
     }, [displayBoard.turn, displayBoard.state, i1, j1, flip]);
 
+    useEffect(() => {
+        if (undo === gameBoard.turn) {
+            setBoardDisabled(false);
+            setRedoColor("");
+        } else {
+            setBoardDisabled(true);
+            setRedoColor("rgba(8, 141, 3, 0.75)");
+        }
+        resetInputs();
+    }, [undo]);
+
     return (
         <>
             <Topbar />
             <div className={classes.game}>
                 <div className={classes.left}>
-                    {timeLimit !== "false" ? (
-                        <>
-                            <Timer turn={gameBoard.turn} player={[0, 1][flip]} time={[time1, time2][flip]} setTime={[setTime1, setTime2][flip]} />
-                            <Timer
-                                turn={gameBoard.turn}
-                                player={[0, 1][1 - flip]}
-                                time={[time1, time2][1 - flip]}
-                                setTime={[setTime1, setTime2][1 - flip]}
-                            />
-                        </>
-                    ) : (
-                        <></>
-                    )}
+                    <Clock turn={gameBoard.turn} flip={flip} timeLimit={timeLimit} restart={restart} />
                 </div>
                 <div className={classes.board}>
                     {Array.from({ length: 8 }).map((_, row) =>
@@ -284,15 +256,26 @@ export default function Game() {
                     )}
                 </div>
                 <div className={classes.right}>
-                    <MoveLog game={gameBoard} displayTurn={displayBoard.turn} />
+                    <MoveLog game={gameBoard} displayTurn={displayBoard.turn} reCreate={reCreate} />
                     <div className={classes.options}>
-                        <button className={classes.option} onClick={handleTakeback}>
+                        <button className={classes.option} onClick={takeback}>
                             Takeback
                         </button>
-                        <button className={classes.option} onClick={handleUndo}>
+                        <button
+                            className={classes.option}
+                            onClick={() => {
+                                if (undo > 0) reCreate(undo - 1);
+                            }}
+                        >
                             Undo
                         </button>
-                        <button className={classes.option} onClick={handleRedo} style={{ backgroundColor: redoColor }}>
+                        <button
+                            className={classes.option}
+                            onClick={() => {
+                                if (undo + 1 <= gameBoard.turn) reCreate(undo + 1);
+                            }}
+                            style={{ backgroundColor: redoColor }}
+                        >
                             Redo
                         </button>
                         <button className={classes.option} onClick={() => setFlip(1 - flip)}>
