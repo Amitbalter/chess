@@ -3,16 +3,19 @@ import React, { useEffect, useRef } from "react";
 
 export default function MoveLog({ game, displayTurn, reCreate }) {
     const movelogRef = useRef(null);
+    const letters = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
     useEffect(() => {
         movelogRef.current.scrollTop = movelogRef.current.scrollHeight;
     }, [game.turn]);
-    const letters = ["a", "b", "c", "d", "e", "f", "g", "h"];
+
     return (
         <div className={classes.movelog} ref={movelogRef}>
             <div className={classes.turns}>
                 {Array.from({ length: Math.ceil(game.turn / 2) }).map((_, index) => (
-                    <p className={classes.turn}>{index + 1}</p>
+                    <p key={index} className={classes.turn}>
+                        {index + 1}
+                    </p>
                 ))}
             </div>
             <div className={classes.moves}>
@@ -22,6 +25,7 @@ export default function MoveLog({ game, displayTurn, reCreate }) {
                     const piece = game.history[index + 1].array[i][j].piece.label;
                     return (
                         <button
+                            key={index}
                             className={classes.move}
                             style={{ backgroundColor: index + 1 === displayTurn ? "rgba(8, 141, 3, 0.75)" : "" }}
                             onClick={() => reCreate(index + 1)}

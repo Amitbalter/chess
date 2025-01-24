@@ -5,11 +5,6 @@ export default function Clock({ turn, flip, timeLimit, restart }) {
     const [time1, setTime1] = useState(60 * timeLimit);
     const [time2, setTime2] = useState(60 * timeLimit);
 
-    useEffect(() => {
-        setTime1(60 * timeLimit);
-        setTime2(60 * timeLimit);
-    }, [restart]);
-
     return (
         <>
             {timeLimit !== "false" ? (
@@ -17,10 +12,13 @@ export default function Clock({ turn, flip, timeLimit, restart }) {
                     const orientation = [flip, 1 - flip][index];
                     return (
                         <Timer
+                            key={index}
                             turn={turn}
                             player={[0, 1][orientation]}
                             time={[time1, time2][orientation]}
                             setTime={[setTime1, setTime2][orientation]}
+                            timeLimit={timeLimit}
+                            restart={restart}
                         />
                     );
                 })
@@ -31,7 +29,7 @@ export default function Clock({ turn, flip, timeLimit, restart }) {
     );
 }
 
-function Timer({ turn, player, time, setTime }) {
+function Timer({ turn, player, time, setTime, timeLimit, restart }) {
     function displayTime(t) {
         const minutes = Math.floor(t / 60);
         const seconds = t % 60;
@@ -39,12 +37,13 @@ function Timer({ turn, player, time, setTime }) {
     }
 
     useEffect(() => {
-        let counter = 0;
+        if (turn === 0) setTime(60 * timeLimit);
         if (turn % 2 === player) {
             const intervalID = setInterval(() => {
-                if (time - counter > 0) {
-                    counter++;
-                    setTime(time - counter);
+                if (time > 0) {
+                    setTime((time) => time - 1);
+                } else {
+                    clearInterval(intervalID);
                 }
             }, 1000);
 
@@ -52,7 +51,7 @@ function Timer({ turn, player, time, setTime }) {
                 clearInterval(intervalID);
             };
         }
-    }, [turn]);
+    }, [turn, restart]);
 
     return (
         <div>
