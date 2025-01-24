@@ -3,7 +3,7 @@ import Topbar from "./Topbar";
 import { Link, useParams } from "react-router-dom";
 import Square from "./Square";
 import Timer from "./Timer";
-import Moves from "./Moves";
+import MoveLog from "./MoveLog";
 import { board } from "../dynamics/board";
 import { king } from "../dynamics/king";
 import { pawn } from "../dynamics/pawn";
@@ -284,7 +284,7 @@ export default function Game() {
                     )}
                 </div>
                 <div className={classes.right}>
-                    <Moves game={gameBoard} />
+                    <MoveLog game={gameBoard} displayTurn={displayBoard.turn} />
                     <div className={classes.options}>
                         <button className={classes.option} onClick={handleTakeback}>
                             Takeback
