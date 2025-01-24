@@ -1,19 +1,24 @@
 .movelog {
     flex: 2;
     width: 300px;
-    padding-top: 20px;
-    padding-left: 10px;
+    padding-top: 10px;
 
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 6fr;
 
     background-color: rgba(203, 162, 92, 0.8);
     text-decoration: none;
     border-radius: 5%;
+
+    overflow: auto;
+    scrollbar-gutter: stable;
+}
+
+.movelog::-webkit-scrollbar {
+    display: none;
 }
 
 .moves {
-    flex: 8;
     height: fit-content;
 
     display: grid;
@@ -21,8 +26,8 @@
 }
 
 .turns {
-    flex: 1;
     height: fit-content;
+    padding-left: 10px;
 }
 
 .turn {

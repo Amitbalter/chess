@@ -5,7 +5,7 @@ export default function About() {
         <div>
             <Topbar />
             <p style={{ marginTop: "50px" }}>
-                I built this chess App as a personal project in web development. The source code can be found on my github&nbsp;
+                I built this chess website as a personal project in web development. The source code can be found on my github&nbsp;
                 <a href="https://github.com/Amitbalter/chess">here</a>.
             </p>
         </div>

@@ -31,13 +31,15 @@
 .right {
     flex: 1;
 
+    width: 300px;
+
     display: flex;
     flex-direction: column;
     padding-left: 50px;
     margin-top: 30px;
     margin-bottom: 30px;
 
-    /* justify-content: space-evenly; */
+    justify-content: space-evenly;
 }
 
 .options {
