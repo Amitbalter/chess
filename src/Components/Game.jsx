@@ -35,6 +35,7 @@ export default function Game() {
     const [undo, setUndo] = useState(0);
     const [next, setNext] = useState(0);
     const [restart, setRestart] = useState(0);
+    const [promotion, setPromotion] = useState(false);
 
     function resetColors() {
         setBoardColors(Array(8).fill(Array(8).fill("")));
@@ -104,7 +105,12 @@ export default function Game() {
         }
         //if second square is same piece of same colour then change input1 to new piece
         else if (i1 !== null) {
-            if (gameBoard.array[i1][j1].piece.moves.includes([row, col].join(""))) {
+            const piece1 = gameBoard.array[i1][j1].piece;
+            if (piece1.moves.includes([row, col].join(""))) {
+                if (piece1.label === "P" && row === [7, 0][gameBoard.turn % 2]) {
+                    setPromotion(true);
+                    setBoardDisabled(true);
+                }
                 seti2(row);
                 setj2(col);
             } else if (gameBoard.array[row][col].piece.color === colors[gameBoard.turn % 2]) {
@@ -125,17 +131,17 @@ export default function Game() {
     useEffect(() => {
         resetColors();
         const dummyBoard = new board();
-        // dummyBoard.setPiece(0, 3, new king("white"));
-        // dummyBoard.setPiece(7, 3, new king("black"));
+        dummyBoard.setPiece(0, 3, new king("white"));
+        dummyBoard.setPiece(7, 3, new king("black"));
         // dummyBoard.setPiece(3, 0, new bishop("white"));
         // dummyBoard.setPiece(6, 6, new knight("black"));
         // dummyBoard.setPiece(4, 5, new knight("white"));
-        // dummyBoard.setPiece(6, 7, new pawn("white"));
-        // dummyBoard.setPiece(1, 7, new pawn("black"));
+        dummyBoard.setPiece(6, 7, new pawn("white"));
+        dummyBoard.setPiece(1, 7, new pawn("black"));
         // dummyBoard.setPiece(0, 5, new rook("white"));
-        // dummyBoard.history[0] = JSON.parse(JSON.stringify(dummyBoard));
-        // dummyBoard.updateBoardMoves(0);
-        dummyBoard.setupBoard();
+        dummyBoard.history[0] = JSON.parse(JSON.stringify(dummyBoard));
+        dummyBoard.updateBoardMoves(0);
+        // dummyBoard.setupBoard();
         setGameBoard(dummyBoard); //updating with dummy board to trigger re-render
         setNext(1 - next);
         setBoardDisabled(false);
@@ -175,43 +181,20 @@ export default function Game() {
         }
     }, [i1, j1, flip]);
 
-    const [go, setGo] = useState(false);
-    const [promotedPiece, setPromotedPiece] = useState(null);
-    const [promotion, setPromotion] = useState(false);
-
-    useEffect(() => {
-        if (i2 !== null && j2 !== null) {
-            const piece1 = gameBoard.array[i1][j1].piece;
-            if (piece1.label === "P" && i2 === [7, 0][gameBoard.turn % 2]) {
-                setPromotion(true);
-                setBoardDisabled(true);
-                if (promotedPiece) {
-                    gameBoard.promotedPiece = promotedPiece;
-                    setGo(true);
-                }
-            } else {
-                setGo(true);
-            }
-        }
-    }, [i2, j2, promotedPiece]);
-
     //making the move and updating the board according to the outcome
     useEffect(() => {
-        if (go) {
+        if (i2 !== null && j2 !== null && !promotion) {
             gameBoard.makeMove(i1, j1, i2, j2);
             setUndo(gameBoard.turn);
             setDisplayBoard(gameBoard.history[gameBoard.turn]);
             resetInputs();
             setMessage("");
-            setGo(false);
-            setPromotion(false);
-            setPromotedPiece(null);
             // if (comp === null) setFlip(1-flip)
         }
         if (computer === "true") {
             setBoardDisabled(gameBoard.turn % 2 !== Number(player));
         }
-    }, [go, promotion]);
+    }, [i2, j2, promotion]);
 
     useEffect(() => {
         let king1 = displayBoard.pieces[displayBoard.turn % 2].find((piece) => piece.label === "K");
@@ -329,7 +312,10 @@ export default function Game() {
                                 <Square
                                     key={label}
                                     index={label}
-                                    setInput={() => setPromotedPiece(label)}
+                                    setInput={() => {
+                                        gameBoard.promotedPiece = label;
+                                        setPromotion(false);
+                                    }}
                                     color="transparent"
                                     piece={label}
                                     pieceColor={colors[gameBoard.turn % 2]}
