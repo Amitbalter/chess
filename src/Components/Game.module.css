@@ -71,7 +71,7 @@
 }
 
 .console {
-    width: 300px;
+    width: 400px;
     height: 100px;
     margin: auto;
     margin-top: 50px;
@@ -86,4 +86,16 @@
 
 .message {
     font-size: large;
+}
+
+.promotion {
+    /* flex: 1; */
+
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    height: 80%;
+    width: 85%;
+
+    /* border: 3px solid red; */
 }

@@ -32,6 +32,9 @@ class board {
         this.state = null;
         this.history = [];
         this.lastMove = null;
+        this.promotion = false;
+        this.promotedPiece = null;
+        this.test = 0;
     }
 
     setupBoard() {
@@ -188,32 +191,16 @@ class board {
         return true;
     }
 
-    choosePiece() {
-        const piece2 = window.prompt("choose a piece from Q,R,B,N:");
-        const index = ["Q", "R", "B", "N"].indexOf(piece2.toUpperCase());
-        if (index === -1) {
-            return this.choosePiece();
-        }
-        return index;
-    }
-
     makeMove(i1, j1, i2, j2) {
         const piece1 = this.array[i1][j1].piece;
-        const result = piece1.move(i1, j1, i2, j2, this);
-        if (result === "promotion") {
-            console.log("promotion");
-            const color = piece1.color;
-            const pieces = [new queen(color), new rook(color), new bishop(color), new knight(color)];
-            this.setPiece(i1, j1, new empty());
-            this.setPiece(i2, j2, pieces[this.choosePiece()]);
-        }
-        if (result) {
+        if (piece1.move(i1, j1, i2, j2, this)) {
             this.turn++;
             this.enPassant[this.turn % 2] = null;
             this.state = null;
             this.lastMove = [i1, j1, i2, j2];
-
+            this.promotedPiece = false;
             this.moves = [[], []];
+
             this.updateBoardMoves((this.turn + 1) % 2);
             if (this.kingInCheck(this.turn % 2)) {
                 this.moves = [[], []];

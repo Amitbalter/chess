@@ -6,10 +6,11 @@ import Clock from "./Clock";
 import MoveLog from "./MoveLog";
 import { board } from "../dynamics/board";
 import { king } from "../dynamics/king";
-import { pawn } from "../dynamics/pawn";
+import { queen } from "../dynamics/queen";
 import { rook } from "../dynamics/rook";
-import { bishop } from "../dynamics/bishop";
 import { knight } from "../dynamics/knight";
+import { bishop } from "../dynamics/bishop";
+import { pawn } from "../dynamics/pawn";
 import { bestMove } from "../dynamics/opponent";
 import classes from "./Game.module.css";
 
@@ -125,11 +126,12 @@ export default function Game() {
         resetColors();
         const dummyBoard = new board();
         // dummyBoard.setPiece(0, 3, new king("white"));
-        // dummyBoard.setPiece(3, 0, new bishop("white"));
         // dummyBoard.setPiece(7, 3, new king("black"));
+        // dummyBoard.setPiece(3, 0, new bishop("white"));
         // dummyBoard.setPiece(6, 6, new knight("black"));
         // dummyBoard.setPiece(4, 5, new knight("white"));
-        // dummyBoard.setPiece(3, 4, new pawn("black"));
+        // dummyBoard.setPiece(6, 7, new pawn("white"));
+        // dummyBoard.setPiece(1, 7, new pawn("black"));
         // dummyBoard.setPiece(0, 5, new rook("white"));
         // dummyBoard.history[0] = JSON.parse(JSON.stringify(dummyBoard));
         // dummyBoard.updateBoardMoves(0);
@@ -173,20 +175,43 @@ export default function Game() {
         }
     }, [i1, j1, flip]);
 
-    //making the move and updating the board according to the outcome
+    const [go, setGo] = useState(false);
+    const [promotedPiece, setPromotedPiece] = useState(null);
+    const [promotion, setPromotion] = useState(false);
+
     useEffect(() => {
         if (i2 !== null && j2 !== null) {
+            const piece1 = gameBoard.array[i1][j1].piece;
+            if (piece1.label === "P" && i2 === [7, 0][gameBoard.turn % 2]) {
+                setPromotion(true);
+                setBoardDisabled(true);
+                if (promotedPiece) {
+                    gameBoard.promotedPiece = promotedPiece;
+                    setGo(true);
+                }
+            } else {
+                setGo(true);
+            }
+        }
+    }, [i2, j2, promotedPiece]);
+
+    //making the move and updating the board according to the outcome
+    useEffect(() => {
+        if (go) {
             gameBoard.makeMove(i1, j1, i2, j2);
             setUndo(gameBoard.turn);
             setDisplayBoard(gameBoard.history[gameBoard.turn]);
             resetInputs();
             setMessage("");
+            setGo(false);
+            setPromotion(false);
+            setPromotedPiece(null);
             // if (comp === null) setFlip(1-flip)
         }
         if (computer === "true") {
             setBoardDisabled(gameBoard.turn % 2 !== Number(player));
         }
-    }, [i2, j2]);
+    }, [go, promotion]);
 
     useEffect(() => {
         let king1 = displayBoard.pieces[displayBoard.turn % 2].find((piece) => piece.label === "K");
@@ -297,7 +322,24 @@ export default function Game() {
                 </div>
             </div>
             <div className={classes.console}>
-                <p className={classes.message}>{`${message}`}</p>
+                {promotion ? (
+                    <div className={classes.promotion}>
+                        {["Q", "R", "B", "N"].map((label) => {
+                            return (
+                                <Square
+                                    key={label}
+                                    index={label}
+                                    setInput={() => setPromotedPiece(label)}
+                                    color="transparent"
+                                    piece={label}
+                                    pieceColor={colors[gameBoard.turn % 2]}
+                                />
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <p className={classes.message}>{`${message}`}</p>
+                )}
             </div>
         </>
     );

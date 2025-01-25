@@ -1,5 +1,9 @@
 import { piece } from "./piece.js";
 import { empty } from "./empty.js";
+import { queen } from "./queen.js";
+import { rook } from "./rook.js";
+import { bishop } from "./bishop.js";
+import { knight } from "./knight.js";
 
 class pawn extends piece {
     constructor(color) {
@@ -40,15 +44,19 @@ class pawn extends piece {
                     let piece = board.array[row][col].piece;
                     if (piece.color !== this.color && piece.label !== "") {
                         this.legalmove(row, col, board);
-                    } else if (
-                        j + s === board.enPassant[(1 + k) / 2] &&
-                        i + k === (3 * (k + 1)) / 2 + 2
-                    ) {
+                    } else if (j + s === board.enPassant[(1 + k) / 2] && i + k === (3 * (k + 1)) / 2 + 2) {
                         this.legalmove(row, col, board);
                     }
                 }
             }
         }
+    }
+
+    choosePiece(label) {
+        return new Promise((resolve, reject) => {
+            if (label) resolve(label);
+            else reject("enter valid label");
+        });
     }
 
     move(i1, j1, i2, j2, board) {
@@ -65,7 +73,15 @@ class pawn extends piece {
             board.doMove(square1, square2);
             return true;
         } else if (this.label === "P" && i2 === (7 * (player + 1)) / 2) {
-            return "promotion";
+            const pieces = {
+                Q: new queen(this.color),
+                R: new rook(this.color),
+                B: new bishop(this.color),
+                N: new knight(this.color),
+            };
+            board.setPiece(i1, j1, new empty());
+            board.setPiece(i2, j2, pieces[board.promotedPiece]);
+            return true;
         } else if (this.color !== piece.color) {
             this.castle = "N";
             board.doMove(square1, square2);

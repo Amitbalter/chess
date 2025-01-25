@@ -40,11 +40,14 @@ function Timer({ turn, player, time, setTime, timeLimit, restart }) {
         if (turn === 0) setTime(60 * timeLimit);
         if (turn % 2 === player) {
             const intervalID = setInterval(() => {
-                if (time > 0) {
-                    setTime((time) => time - 1);
-                } else {
-                    clearInterval(intervalID);
-                }
+                setTime((time) => {
+                    if (time > 0) {
+                        return time - 1;
+                    } else {
+                        clearInterval(intervalID);
+                        return 0;
+                    }
+                });
             }, 1000);
 
             return () => {
