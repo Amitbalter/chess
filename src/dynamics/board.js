@@ -32,7 +32,6 @@ class board {
         this.state = null;
         this.history = [];
         this.lastMove = null;
-        this.promotion = false;
         this.promotedPiece = null;
         this.test = 0;
     }
@@ -198,7 +197,7 @@ class board {
             this.enPassant[this.turn % 2] = null;
             this.state = null;
             this.lastMove = [i1, j1, i2, j2];
-            this.promotedPiece = false;
+            this.promotedPiece = null;
             this.moves = [[], []];
 
             this.updateBoardMoves((this.turn + 1) % 2);

@@ -1,7 +1,5 @@
 To do:
 
 message needs to change after computer move
-deal with promotion
-timers need to restart with restart
 
-add functionality to buttons of move log, fix overflowing issue
+improve minmax algorithm by implementing alpha beta pruning
