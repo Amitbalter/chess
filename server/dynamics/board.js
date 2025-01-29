@@ -234,17 +234,6 @@ class board {
             this.history.push(arrangement);
         }
     }
-
-    valuation() {
-        const values = { P: 1, N: 3, B: 3, R: 5, Q: 9, K: 0 };
-        let valuation = 0;
-        for (let k of [0, 1]) {
-            for (let piece of this.pieces[k]) {
-                valuation += (1 - 2 * k) * values[piece.label];
-            }
-        }
-        return valuation;
-    }
 }
 
 export { board };

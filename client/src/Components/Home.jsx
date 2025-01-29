@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import Topbar from "./Topbar";
 import classes from "./Home.module.css";
+import Users from "./User";
 
 export default function Home() {
     const [start, setStart] = useState(false);
@@ -26,6 +27,7 @@ export default function Home() {
     return (
         <div>
             <Topbar />
+            <Users />
             <div className={classes.options}>
                 <button onClick={() => setPlayer(0)} className={classes.option} style={changeOptionColor(player, 0)}>
                     White

@@ -1,5 +1,0 @@
-To do:
-
-message needs to change after computer move
-
-improve minmax algorithm by implementing alpha beta pruning

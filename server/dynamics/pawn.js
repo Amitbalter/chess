@@ -52,13 +52,6 @@ class pawn extends piece {
         }
     }
 
-    choosePiece(label) {
-        return new Promise((resolve, reject) => {
-            if (label) resolve(label);
-            else reject("enter valid label");
-        });
-    }
-
     move(i1, j1, i2, j2, board) {
         const square1 = board.array[i1][j1];
         const square2 = board.array[i2][j2];

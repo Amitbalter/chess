@@ -80,11 +80,13 @@ export default function Game() {
 
     function generateMove() {
         const move = bestMove(gameBoard, Number(depth));
+        console.log(move);
         if (move) {
             seti1(move[0]);
             setj1(move[1]);
             seti2(move[2]);
             setj2(move[3]);
+            gameBoard.promotedPiece = move[4];
         }
     }
 
@@ -136,9 +138,9 @@ export default function Game() {
         // dummyBoard.setPiece(3, 0, new bishop("white"));
         // dummyBoard.setPiece(6, 6, new knight("black"));
         // dummyBoard.setPiece(4, 5, new knight("white"));
-        dummyBoard.setPiece(6, 7, new pawn("white"));
-        dummyBoard.setPiece(1, 7, new pawn("black"));
-        // dummyBoard.setPiece(0, 5, new rook("white"));
+        // dummyBoard.setPiece(6, 7, new pawn("white"));
+        // dummyBoard.setPiece(1, 7, new pawn("black"));
+        dummyBoard.setPiece(0, 5, new rook("white"));
         dummyBoard.history[0] = JSON.parse(JSON.stringify(dummyBoard));
         dummyBoard.updateBoardMoves(0);
         // dummyBoard.setupBoard();
