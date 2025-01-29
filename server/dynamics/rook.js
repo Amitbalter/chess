@@ -1,6 +1,6 @@
-import { piece } from "./piece.js";
+const { Piece } = require("./piece.js");
 
-class rook extends piece {
+class Rook extends Piece {
     constructor(color) {
         super(color);
         this.label = "R";
@@ -30,7 +30,7 @@ class rook extends piece {
             const row = 7 * ["white", "black"].indexOf(this.color);
             let king = board.array[row][3].piece;
             if (king.castle === "Y") {
-                const n = (2 * j) / 7 - 1; // n is +1 or -1 depending on rook
+                const n = (2 * j) / 7 - 1; // n is +1 or -1 depending on Rook
                 if (i === row && Math.abs(n) === 1) {
                     let empty = true;
                     for (let s = 1; n * (3 + n * s) <= j - 1; s++) {
@@ -88,4 +88,4 @@ class rook extends piece {
     }
 }
 
-export { rook };
+module.exports = { Rook };

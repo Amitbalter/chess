@@ -27,7 +27,7 @@ export default function Home() {
     return (
         <div>
             <Topbar />
-            <Users />
+            {/* <Users /> */}
             <div className={classes.options}>
                 <button onClick={() => setPlayer(0)} className={classes.option} style={changeOptionColor(player, 0)}>
                     White

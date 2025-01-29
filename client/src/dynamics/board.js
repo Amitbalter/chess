@@ -15,7 +15,7 @@ class square {
     }
 }
 
-class board {
+class Board {
     constructor() {
         this.array = [];
         for (let i = 0; i < 8; i++) {
@@ -115,7 +115,7 @@ class board {
     }
 
     replicate() {
-        const copy = new board();
+        const copy = new Board();
         copy.turn = this.turn;
         copy.enPassant = [...this.enPassant];
         copy.state = this.state;
@@ -141,7 +141,7 @@ class board {
     }
 
     restore(turn) {
-        const copy = new board();
+        const copy = new Board();
         const arrangement = this.history[turn];
         copy.turn = arrangement.turn;
         copy.enPassant = [...arrangement.enPassant];
@@ -236,4 +236,4 @@ class board {
     }
 }
 
-export { board };
+export { Board };

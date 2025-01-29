@@ -1,11 +1,10 @@
-import { pawn } from "./pawn.js";
-import { rook } from "./rook.js";
-import { knight } from "./knight.js";
-import { bishop } from "./bishop.js";
-import { queen } from "./queen.js";
-import { king } from "./king.js";
-import { empty } from "./empty.js";
-import { piece } from "./piece.js";
+const { Pawn } = require("./pawn.js");
+const { Rook } = require("./rook.js");
+const { Knight } = require("./knight.js");
+const { Bishop } = require("./bishop.js");
+const { Queen } = require("./queen.js");
+const { King } = require("./king.js");
+const { Empty } = require("./empty.js");
 
 class square {
     constructor(color, position, piece) {
@@ -15,13 +14,13 @@ class square {
     }
 }
 
-class board {
+class Board {
     constructor() {
         this.array = [];
         for (let i = 0; i < 8; i++) {
             let row = [];
             for (let j = 0; j < 8; j++) {
-                row.push(new square(["white", "black"][(i + j) % 2], [i, j], new empty()));
+                row.push(new square(["white", "black"][(i + j) % 2], [i, j], new Empty()));
             }
             this.array.push(row);
         }
@@ -38,28 +37,28 @@ class board {
 
     setupBoard() {
         const whitePieces = [
-            new rook("white"),
-            new knight("white"),
-            new bishop("white"),
-            new king("white"),
-            new queen("white"),
-            new bishop("white"),
-            new knight("white"),
-            new rook("white"),
+            new Rook("white"),
+            new Knight("white"),
+            new Bishop("white"),
+            new King("white"),
+            new Queen("white"),
+            new Bishop("white"),
+            new Knight("white"),
+            new Rook("white"),
         ];
         const blackPieces = [
-            new rook("black"),
-            new knight("black"),
-            new bishop("black"),
-            new king("black"),
-            new queen("black"),
-            new bishop("black"),
-            new knight("black"),
-            new rook("black"),
+            new Rook("black"),
+            new Knight("black"),
+            new Bishop("black"),
+            new King("black"),
+            new Queen("black"),
+            new Bishop("black"),
+            new Knight("black"),
+            new Rook("black"),
         ];
         for (let j = 0; j < 8; j++) {
-            this.setPiece(1, j, new pawn("white"));
-            this.setPiece(6, j, new pawn("black"));
+            this.setPiece(1, j, new Pawn("white"));
+            this.setPiece(6, j, new Pawn("black"));
             this.setPiece(0, j, whitePieces[j]);
             this.setPiece(7, j, blackPieces[j]);
         }
@@ -93,7 +92,7 @@ class board {
         }
         square2.piece = piece1; //move piece from square1 to square2
         piece1.position = square2.position; //update position of piece
-        square1.piece = new empty(); //square1 is now empty
+        square1.piece = new Empty(); //square1 is now empty
     }
 
     //function that updates all the possible moves on the board
@@ -115,7 +114,7 @@ class board {
     }
 
     replicate() {
-        const copy = new board();
+        const copy = new Board();
         copy.turn = this.turn;
         copy.enPassant = [...this.enPassant];
         copy.state = this.state;
@@ -123,12 +122,12 @@ class board {
         for (let k of [0, 1]) {
             for (let piece of this.pieces[k]) {
                 const pieces = {
-                    P: new pawn(piece.color),
-                    N: new knight(piece.color),
-                    B: new bishop(piece.color),
-                    R: new rook(piece.color),
-                    Q: new queen(piece.color),
-                    K: new king(piece.color),
+                    P: new Pawn(piece.color),
+                    N: new Knight(piece.color),
+                    B: new Bishop(piece.color),
+                    R: new Rook(piece.color),
+                    Q: new Queen(piece.color),
+                    K: new King(piece.color),
                 };
                 const copyPiece = pieces[piece.label];
                 copyPiece.castle = piece.castle;
@@ -141,7 +140,7 @@ class board {
     }
 
     restore(turn) {
-        const copy = new board();
+        const copy = new Board();
         const arrangement = this.history[turn];
         copy.turn = arrangement.turn;
         copy.enPassant = [...arrangement.enPassant];
@@ -150,12 +149,12 @@ class board {
         for (let k of [0, 1]) {
             for (let piece of arrangement.pieces[k]) {
                 const pieces = {
-                    P: new pawn(piece.color),
-                    N: new knight(piece.color),
-                    B: new bishop(piece.color),
-                    R: new rook(piece.color),
-                    Q: new queen(piece.color),
-                    K: new king(piece.color),
+                    P: new Pawn(piece.color),
+                    N: new Knight(piece.color),
+                    B: new Bishop(piece.color),
+                    R: new Rook(piece.color),
+                    Q: new Queen(piece.color),
+                    K: new King(piece.color),
                 };
                 const copyPiece = pieces[piece.label];
                 copyPiece.castle = piece.castle;
@@ -236,4 +235,4 @@ class board {
     }
 }
 
-export { board };
+module.exports = { Board };

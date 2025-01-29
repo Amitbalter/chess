@@ -1,4 +1,4 @@
-class empty {
+class Empty {
     constructor() {
         this.label = "";
         this.color = "";
@@ -6,4 +6,4 @@ class empty {
     }
 }
 
-export { empty };
+module.exports = { Empty };

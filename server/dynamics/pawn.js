@@ -1,11 +1,11 @@
-import { piece } from "./piece.js";
-import { empty } from "./empty.js";
-import { queen } from "./queen.js";
-import { rook } from "./rook.js";
-import { bishop } from "./bishop.js";
-import { knight } from "./knight.js";
+const { Rook } = require("./rook.js");
+const { Knight } = require("./knight.js");
+const { Bishop } = require("./bishop.js");
+const { queen } = require("./queen.js");
+const { Empty } = require("./empty.js");
+const { Piece } = require("./piece.js");
 
-class pawn extends piece {
+class Pawn extends Piece {
     constructor(color) {
         super(color);
         this.label = "P";
@@ -62,17 +62,17 @@ class pawn extends piece {
             board.doMove(square1, square2);
             return true;
         } else if (this.label === "P" && piece.label === "" && j1 !== j2) {
-            board.setPiece((7 + player) / 2, j2, new empty());
+            board.setPiece((7 + player) / 2, j2, new Empty());
             board.doMove(square1, square2);
             return true;
         } else if (this.label === "P" && i2 === (7 * (player + 1)) / 2) {
             const pieces = {
                 Q: new queen(this.color),
-                R: new rook(this.color),
-                B: new bishop(this.color),
-                N: new knight(this.color),
+                R: new Rook(this.color),
+                B: new Bishop(this.color),
+                N: new Knight(this.color),
             };
-            board.setPiece(i1, j1, new empty());
+            board.setPiece(i1, j1, new Empty());
             board.setPiece(i2, j2, pieces[board.promotedPiece]);
             return true;
         } else if (this.color !== piece.color) {
@@ -83,4 +83,4 @@ class pawn extends piece {
     }
 }
 
-export { pawn };
+module.exports = { Pawn };

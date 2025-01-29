@@ -58,4 +58,4 @@ function bestMove(board, depth) {
     return bestPosition(board, depth)[0];
 }
 
-export { bestMove };
+module.exports = { bestMove };

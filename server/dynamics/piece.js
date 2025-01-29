@@ -1,6 +1,6 @@
-import { empty } from "./empty.js";
+const { Empty } = require("./empty.js");
 
-class piece {
+class Piece {
     constructor(color) {
         this.color = color;
         this.castle = "N";
@@ -28,7 +28,7 @@ class piece {
         const [piece1, piece2] = [square1.piece, square2.piece];
         if (piece1.label === "P" && piece2.label === "" && j !== col) {
             //enpassant
-            copy.setPiece(4 - n, col, new empty());
+            copy.setPiece(4 - n, col, new Empty());
         }
         copy.doMove(square1, square2);
         copy.updateBoardMoves(1 - n); //update moves of opposite color
@@ -49,4 +49,4 @@ class piece {
     }
 }
 
-export { piece };
+module.exports = { Piece };
