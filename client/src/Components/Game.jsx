@@ -15,6 +15,7 @@ export default function Game() {
     const [flip, setFlip] = useState(1 - player);
     const [redoColor, setRedoColor] = useState("");
     const [message, setMessage] = useState("");
+    const [moves, setMoves] = useState([]);
 
     const [board, setBoard] = useState(null);
 
@@ -83,6 +84,7 @@ export default function Game() {
                         setPrev(data.lastMove);
                         setTurn(data.turn);
                         setRealTurn(data.turn);
+                        setMoves(data.movelog);
                         resetInputs();
                     })
                     .catch((error) => console.error("Error patching data:", error));
@@ -208,6 +210,7 @@ export default function Game() {
                     setPrev(data.lastMove);
                     setTurn(data.turn);
                     setRealTurn(data.turn);
+                    setMoves(data.movelog);
                     resetInputs();
                 })
                 .catch((error) => console.error("Error patching data:", error));
@@ -294,7 +297,7 @@ export default function Game() {
                     )}
                 </div>
                 <div className={classes.right}>
-                    <MoveLog realTurn={realTurn} turn={turn} reCreate={reCreate} />
+                    <MoveLog moves={moves} realTurn={realTurn} turn={turn} reCreate={reCreate} />
                     <div className={classes.options}>
                         <button className={classes.option} onClick={takeback}>
                             Takeback

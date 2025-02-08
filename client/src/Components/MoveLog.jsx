@@ -1,20 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import classes from "./MoveLog.module.css";
 
-export default function MoveLog({ realTurn, turn, reCreate }) {
+export default function MoveLog({ moves, realTurn, turn, reCreate }) {
     const movelogRef = useRef(null);
-    const [moves, setMoves] = useState([]);
     const letters = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
     useEffect(() => {
-        if (realTurn > 0) {
-            fetch(`/api/game/1`)
-                .then((res) => res.json())
-                .then((data) => {
-                    setMoves(data.movelog);
-                });
-            movelogRef.current.scrollTop = movelogRef.current.scrollHeight;
-        }
+        movelogRef.current.scrollTop = movelogRef.current.scrollHeight;
     }, [realTurn]);
 
     return (
