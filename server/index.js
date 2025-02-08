@@ -28,14 +28,21 @@ app.get("/api/game/:id", (req, res) => {
         game.setupBoard();
         data[id] = game;
     }
-    res.status(200).send(data[id]);
+    const turn = req.query.turn || data[id].turn;
+    res.status(200).send(data[id].history[turn]);
 });
 
 app.post("/api/game/:id", (req, res) => {
     const { id } = req.params;
-    const moves = req.body;
-    const game = data[id];
-    game.makeMove(...moves);
+    const { move, takeback } = req.body;
+    let game = data[id];
+    if (move) {
+        game.makeMove(...move);
+    }
+    if (takeback) {
+        game = game.revert(takeback);
+        data[id] = game;
+    }
     res.status(200).send(game.history[game.turn]);
 });
 

@@ -1,7 +1,7 @@
 const { Rook } = require("./rook.js");
 const { Knight } = require("./knight.js");
 const { Bishop } = require("./bishop.js");
-const { queen } = require("./queen.js");
+const { Queen } = require("./queen.js");
 const { Empty } = require("./empty.js");
 const { Piece } = require("./piece.js");
 
@@ -67,7 +67,7 @@ class Pawn extends Piece {
             return true;
         } else if (this.label === "P" && i2 === (7 * (player + 1)) / 2) {
             const pieces = {
-                Q: new queen(this.color),
+                Q: new Queen(this.color),
                 R: new Rook(this.color),
                 B: new Bishop(this.color),
                 N: new Knight(this.color),

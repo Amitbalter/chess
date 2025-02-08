@@ -32,7 +32,7 @@ class Board {
         this.history = [];
         this.lastMove = null;
         this.promotedPiece = null;
-        this.test = 0;
+        this.movelog = [];
     }
 
     setupBoard() {
@@ -63,8 +63,8 @@ class Board {
             this.setPiece(7, j, blackPieces[j]);
         }
 
-        this.history.push(JSON.parse(JSON.stringify(this)));
         this.updateBoardMoves(0);
+        this.history.push(JSON.parse(JSON.stringify(this)));
     }
 
     setPiece(i, j, piece) {
@@ -119,6 +119,7 @@ class Board {
         copy.enPassant = [...this.enPassant];
         copy.state = this.state;
         copy.lastMove = this.lastMove;
+        copy.movelog = this.movelog;
         for (let k of [0, 1]) {
             for (let piece of this.pieces[k]) {
                 const pieces = {
@@ -146,6 +147,7 @@ class Board {
         copy.enPassant = [...arrangement.enPassant];
         copy.state = arrangement.state;
         copy.lastMove = arrangement.lastMove;
+        copy.movelog = arrangement.movelog;
         for (let k of [0, 1]) {
             for (let piece of arrangement.pieces[k]) {
                 const pieces = {
@@ -189,13 +191,15 @@ class Board {
         return true;
     }
 
-    makeMove(i1, j1, i2, j2) {
+    makeMove(i1, j1, i2, j2, promotedPiece) {
+        this.promotedPiece = promotedPiece;
         const piece1 = this.array[i1][j1].piece;
         if (piece1.move(i1, j1, i2, j2, this)) {
             this.turn++;
             this.enPassant[this.turn % 2] = null;
             this.state = null;
             this.lastMove = [i1, j1, i2, j2];
+            this.movelog.push([i2, j2, piece1.label]);
             this.promotedPiece = null;
             this.moves = [[], []];
 

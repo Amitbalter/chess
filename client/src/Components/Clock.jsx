@@ -37,7 +37,10 @@ function Timer({ turn, player, time, setTime, timeLimit, restart }) {
     }
 
     useEffect(() => {
-        if (turn === 0) setTime(60 * timeLimit);
+        setTime(60 * timeLimit);
+    }, [restart]);
+
+    useEffect(() => {
         if (turn % 2 === player) {
             const intervalID = setInterval(() => {
                 setTime((time) => {
