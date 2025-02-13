@@ -1,0 +1,11 @@
+GET http://localhost:1234/games/
+
+###
+
+POST  http://localhost:1234/games/
+Content-Type: application/json
+
+{
+    "time":700,
+    "color":"white"
+}

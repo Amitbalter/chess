@@ -16,14 +16,11 @@ class square {
 
 class Board {
     constructor() {
-        this.array = [];
-        for (let i = 0; i < 8; i++) {
-            let row = [];
-            for (let j = 0; j < 8; j++) {
-                row.push(new square(["white", "black"][(i + j) % 2], [i, j], new Empty()));
-            }
-            this.array.push(row);
-        }
+        this.array = Array.from({ length: 8 }).map((_, i) =>
+            Array.from({ length: 8 }).map((_, j) => {
+                return new square(["white", "black"][(i + j) % 2], [i, j], new Empty());
+            })
+        );
         this.enPassant = [null, null];
         this.pieces = [[], []];
         this.moves = [[], []];
@@ -36,31 +33,24 @@ class Board {
     }
 
     setupBoard() {
-        const whitePieces = [
-            new Rook("white"),
-            new Knight("white"),
-            new Bishop("white"),
-            new King("white"),
-            new Queen("white"),
-            new Bishop("white"),
-            new Knight("white"),
-            new Rook("white"),
-        ];
-        const blackPieces = [
-            new Rook("black"),
-            new Knight("black"),
-            new Bishop("black"),
-            new King("black"),
-            new Queen("black"),
-            new Bishop("black"),
-            new Knight("black"),
-            new Rook("black"),
-        ];
+        const pieces = ["white", "black"].map((color) => {
+            return [
+                new Rook(color),
+                new Knight(color),
+                new Bishop(color),
+                new King(color),
+                new Queen(color),
+                new Bishop(color),
+                new Knight(color),
+                new Rook(color),
+            ];
+        });
+
         for (let j = 0; j < 8; j++) {
             this.setPiece(1, j, new Pawn("white"));
             this.setPiece(6, j, new Pawn("black"));
-            this.setPiece(0, j, whitePieces[j]);
-            this.setPiece(7, j, blackPieces[j]);
+            this.setPiece(0, j, pieces[0][j]);
+            this.setPiece(7, j, pieces[1][j]);
         }
 
         this.updateBoardMoves(0);
@@ -140,14 +130,14 @@ class Board {
         return copy;
     }
 
-    restore(turn) {
+    restore(arrangement) {
         const copy = new Board();
-        const arrangement = this.history[turn];
         copy.turn = arrangement.turn;
         copy.enPassant = [...arrangement.enPassant];
         copy.state = arrangement.state;
         copy.lastMove = arrangement.lastMove;
         copy.movelog = arrangement.movelog;
+        copy.history = arrangement.history;
         for (let k of [0, 1]) {
             for (let piece of arrangement.pieces[k]) {
                 const pieces = {
@@ -169,7 +159,7 @@ class Board {
     }
 
     revert(turns) {
-        const copy = this.restore(this.turn - turns);
+        const copy = this.restore(this.history[this.turn - turns]);
         copy.history = this.history.slice(0, -turns);
         copy.updateBoardMoves(copy.turn % 2);
         return copy;

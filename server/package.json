@@ -1,16 +1,23 @@
 {
-  "name": "server",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "express": "^4.21.2",
-    "nodemon": "^3.1.9"
-  }
+    "name": "server",
+    "version": "1.0.0",
+    "main": "index.js",
+    "scripts": {
+        "setup-dbs": "psql -f ./db/setup.sql",
+        "seed": "npm run setup-dbs && node ./db/seeds/run-seed.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.21.2",
+        "mongoose": "^8.10.0"
+    },
+    "devDependencies": {
+        "dotenv": "^16.4.7",
+        "nodemon": "^3.1.9",
+        "pg": "^8.13.1"
+    },
+    "description": ""
 }

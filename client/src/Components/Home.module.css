@@ -1,51 +1,95 @@
-.options {
+.mainoptions {
     width: 800px;
-    height: 150px;
+    height: 100px;
     margin: auto;
+    margin-top: 50px;
+    margin-bottom: 50px;
 
     display: flex;
-    flex-direction: row;
     justify-content: space-evenly;
+}
+
+.mainoption {
+    height: 100%;
+    aspect-ratio: 2;
+
+    display: flex;
+    justify-content: center;
     align-items: center;
 
-    list-style-type: none;
+    text-decoration: none;
+    color: black;
+    background-color: rgba(203, 162, 92, 0.8);
+    font-size: x-large;
+    border: none;
+    border-radius: 5%;
+}
 
-    /* border: 3px solid green; */
+.optionmenu,
+.gamelog {
+    width: 600px;
+    height: 500px;
+    margin: auto;
+
+    background-color: rgba(203, 162, 92, 0.8);
+    text-decoration: none;
+    border-radius: 5%;
+}
+
+.optionmenu {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.gamelog {
+    overflow: auto;
+    scrollbar-gutter: stable;
+}
+
+.gamelog::-webkit-scrollbar {
+    display: none;
+}
+
+.options {
+    height: 25%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .option {
-    height: 50%;
-    aspect-ratio: 2;
+    height: 100%;
+    width: 50%;
 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    text-decoration: none;
-    color: black;
-    background-color: rgba(203, 162, 92, 0.8);
+    background-color: transparent;
     font-size: x-large;
     border: none;
-    border-radius: 5%;
 }
 
-.link {
-    height: 50%;
-    aspect-ratio: 2;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    text-decoration: none;
-    color: black;
-    background-color: rgba(203, 162, 92, 0.8);
-    font-size: x-large;
-    border: none;
-    border-radius: 5%;
-}
-
-.option:hover {
+.mainoption:hover,
+.option:hover,
+.game:hover {
     background-color: rgb(203, 162, 92);
     cursor: pointer;
+}
+
+.game,
+.header {
+    height: 30px;
+    width: 100%;
+    border: None;
+
+    background-color: transparent;
+    font-size: large;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    justify-content: center;
+}
+
+.header {
+    height: 50px;
 }

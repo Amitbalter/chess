@@ -4,11 +4,16 @@ import Topbar from "./Topbar";
 import Square from "./Square";
 import Clock from "./Clock";
 import MoveLog from "./MoveLog";
-import { bestMove } from "../dynamics/opponent";
 import classes from "./Game.module.css";
 
 export default function Game() {
-    const { player, computer, timeLimit, depth } = useParams();
+    const { id } = useParams();
+
+    const [player, setPlayer] = useState(0);
+    const [computer, setComputer] = useState("false");
+
+    const [time1, setTime1] = useState(null);
+    const [time2, setTime2] = useState(null);
 
     const [boardColors, setBoardColors] = useState(Array(8).fill(Array(8).fill("")));
     const [boardDisabled, setBoardDisabled] = useState(false);
@@ -29,31 +34,24 @@ export default function Game() {
     const [prev, setPrev] = useState(null);
     const [turn, setTurn] = useState(null);
     const [realTurn, setRealTurn] = useState(null);
-    const [restart, setRestart] = useState(0);
+    const [restart, setRestart] = useState(false);
     const [promotedPiece, setPromotedPiece] = useState(null);
 
     useEffect(() => {
-        fetch(`/api/game/1`)
-            .then((res) => res.json())
+        fetch(`/games/${id}`)
+            .then((response) => {
+                return response.json();
+            })
             .then((data) => {
-                setBoard(data);
-                setTurn(data.turn);
-                setRealTurn(data.turn);
-                setPrev(data.lastMove);
+                setBoard(data.board);
+                setPrev(data.board.lastMove);
+                setTurn(data.board.turn);
+                setRealTurn(data.board.turn);
+                setMoves(data.board.movelog);
+                setTime1(data.time[0]);
+                setTime2(data.time[1]);
             });
     }, []);
-
-    function resetColors() {
-        setBoardColors(Array(8).fill(Array(8).fill("")));
-    }
-
-    function changeSquareColor(i, j, color) {
-        setBoardColors((boardColors) => {
-            const copyboardColors = boardColors.map((row) => [...row]);
-            copyboardColors[[i, 7 - i][flip]][[j, 7 - j][flip]] = color;
-            return copyboardColors;
-        });
-    }
 
     function resetInputs() {
         seti1(null);
@@ -71,12 +69,10 @@ export default function Game() {
                 turns = 2;
             }
             if (turns) {
-                fetch("/api/game/1", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ takeback: turns }),
+                fetch(`/games/${id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ takeback: turns, time: [time1, time2] }),
                 })
                     .then((res) => res.json())
                     .then((data) => {
@@ -86,6 +82,8 @@ export default function Game() {
                         setRealTurn(data.turn);
                         setMoves(data.movelog);
                         resetInputs();
+                        setPromotedPiece(null);
+                        setMessage("");
                     })
                     .catch((error) => console.error("Error patching data:", error));
             }
@@ -93,25 +91,14 @@ export default function Game() {
     }
 
     function reCreate(turn) {
-        fetch(`/api/game/1?turn=${turn}`)
+        fetch(`/games/${id}?turn=${turn}`)
             .then((res) => res.json())
             .then((data) => {
-                setBoard(data);
-                setPrev(data.lastMove);
+                setBoard(data.board);
+                setPrev(data.board.lastMove);
                 setTurn(turn);
             });
     }
-
-    // function generateMove() {
-    //     const move = bestMove(gameBoard, Number(depth));
-    //     if (move) {
-    //         seti1(move[0]);
-    //         setj1(move[1]);
-    //         seti2(move[2]);
-    //         setj2(move[3]);
-    //         gameBoard.promotedPiece = move[4];
-    //     }
-    // }
 
     function setInput(index) {
         const [i, j] = [index[0], index[1]];
@@ -154,55 +141,17 @@ export default function Game() {
     }
 
     useEffect(() => {
-        resetColors();
-        setNext(1 - next);
-        setBoardDisabled(false);
-        setRedoColor("");
-        setMessage("");
-        setTurn(null);
-        setRealTurn(null);
-    }, [restart]);
-
-    //coloring previous move in blue
-    useEffect(() => {
-        resetColors();
-        if (prev !== null) {
-            changeSquareColor(prev[0], prev[1], "rgb(72, 111, 197)");
-            changeSquareColor(prev[2], prev[3], "rgba(68, 114, 212, 0.8)");
+        if (restart) {
+            setBoardColors(Array(8).fill(Array(8).fill("")));
+            resetInputs();
             setNext(1 - next);
-        }
-    }, [prev, i1, j1, flip]);
-
-    // useEffect(() => {
-    //     if (computer === "true" && realTurn % 2 !== Number(player)) {
-    //         generateMove();
-    //     }
-    // }, [next]);
-
-    //coloring current piece and moves in green if human move
-    useEffect(() => {
-        if ((computer === "true" && realTurn % 2 === Number(player)) || computer === "false") {
-            if (i1 !== null && j1 !== null) {
-                let piece1 = board.array[i1][j1].piece;
-                changeSquareColor(i1, j1, "rgb(5, 136, 0)");
-                // console.log(piece1);
-                for (let move of piece1.moves) {
-                    const [k, l] = [Number(move[0]), Number(move[1])];
-                    changeSquareColor(k, l, "rgba(8, 141, 3, 0.75)");
-                }
-            }
-        }
-    }, [i1, j1, flip]);
-
-    //making the move and updating the board according to the outcome
-    useEffect(() => {
-        if (i2 !== null && j2 !== null && promotedPiece != "required") {
-            fetch("/api/game/1", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ move: [i1, j1, i2, j2, promotedPiece] }),
+            setBoardDisabled(false);
+            setMessage("");
+            setRestart(false);
+            fetch(`/games/${id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ takeback: realTurn }),
             })
                 .then((res) => res.json())
                 .then((data) => {
@@ -211,6 +160,30 @@ export default function Game() {
                     setTurn(data.turn);
                     setRealTurn(data.turn);
                     setMoves(data.movelog);
+                })
+                .catch((error) => console.error("Error patching data:", error));
+        }
+    }, [restart]);
+
+    //making the move and updating the board according to the outcome
+    useEffect(() => {
+        if (i2 !== null && j2 !== null && promotedPiece != "required") {
+            fetch(`/games/${id}`, {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ move: [i1, j1, i2, j2, promotedPiece], time: [time1, time2] }),
+            })
+                .then((res) => res.json())
+                .then((data) => {
+                    setBoard(data);
+                    setPrev(data.lastMove);
+                    setTurn(data.turn);
+                    setRealTurn(data.turn);
+                    setMoves(data.movelog);
+                    // setTime1(data.time[0]);
+                    // setTime2(data.time[1]);
                     resetInputs();
                 })
                 .catch((error) => console.error("Error patching data:", error));
@@ -223,7 +196,24 @@ export default function Game() {
         }
     }, [i2, j2, promotedPiece]);
 
+    //changing colors on board
     useEffect(() => {
+        const dummyColors = Array.from({ length: 8 }, () => Array(8).fill(""));
+        if (prev !== null) {
+            dummyColors[prev[0]][prev[1]] = "rgb(72, 111, 197)";
+            dummyColors[prev[2]][prev[3]] = "rgba(68, 114, 212, 0.8)";
+            setNext(1 - next);
+        }
+        if ((computer === "true" && realTurn % 2 === Number(player)) || computer === "false") {
+            if (i1 !== null && j1 !== null) {
+                let piece1 = board.array[i1][j1].piece;
+                dummyColors[i1][j1] = "rgb(5, 136, 0)";
+                for (let move of piece1.moves) {
+                    const [k, l] = [Number(move[0]), Number(move[1])];
+                    dummyColors[k][l] = "rgba(8, 141, 3, 0.75)";
+                }
+            }
+        }
         if (turn !== null) {
             let king1 = board.pieces[turn % 2].find((piece) => piece.label === "K");
             let king2 = board.pieces[(turn + 1) % 2].find((piece) => piece.label === "K");
@@ -234,30 +224,31 @@ export default function Game() {
                     case "check":
                         setMessage(`The ${king1.color} king is in check`);
                         if (k !== i1 || l !== j1) {
-                            changeSquareColor(k, l, "rgb(218, 137, 33)");
+                            dummyColors[k][l] = "rgb(218, 137, 33)";
                         }
                         break;
                     case "checkmate":
                         setMessage(`Checkmate, ${king2.color} wins`);
-                        changeSquareColor(k, l, "purple");
+                        dummyColors[k][l] = "purple";
                         setBoardDisabled(true);
                         break;
                     case "stalemate":
                         setMessage("Stalemate");
-                        changeSquareColor(k, l, "pink");
-                        changeSquareColor(m, n, "pink");
+                        dummyColors[k][l] = "pink";
+                        dummyColors[m][n] = "pink";
                         setBoardDisabled(true);
                         break;
                     case "threefold":
                         setMessage("Threefold repetition");
-                        changeSquareColor(k, l, "yellow");
-                        changeSquareColor(m, n, "yellow");
+                        dummyColors[k][l] = "yellow";
+                        dummyColors[m][n] = "yellow";
                         setBoardDisabled(true);
                         break;
                 }
             }
         }
-    }, [turn, i1, j1, flip]);
+        setBoardColors(dummyColors);
+    }, [prev, i1, j1, flip]);
 
     useEffect(() => {
         if (turn === realTurn) {
@@ -275,7 +266,7 @@ export default function Game() {
             <Topbar />
             <div className={classes.game}>
                 <div className={classes.left}>
-                    <Clock turn={realTurn} flip={flip} timeLimit={timeLimit} restart={restart} />
+                    <Clock turn={realTurn} flip={flip} time1={time1} time2={time2} setTime1={setTime1} setTime2={setTime2} restart={restart} />
                 </div>
                 <div className={classes.board}>
                     {board ? (
@@ -285,7 +276,7 @@ export default function Game() {
                                     key={[row, col]}
                                     index={[row, col]}
                                     setInput={setInput}
-                                    color={boardColors[row][col]}
+                                    color={boardColors[[row, 7 - row][flip]][[col, 7 - col][flip]]}
                                     piece={board.array[[row, 7 - row][flip]][[col, 7 - col][flip]].piece.label}
                                     pieceColor={board.array[[row, 7 - row][flip]][[col, 7 - col][flip]].piece.color}
                                     disabled={boardDisabled}
@@ -329,7 +320,7 @@ export default function Game() {
                             className={classes.option}
                             onClick={() => {
                                 setMessage(`${colors[player]} resigns, game is over`);
-                                setRestart(restart + 1);
+                                setRestart(true);
                             }}
                         >
                             Resign
@@ -362,3 +353,20 @@ export default function Game() {
         </>
     );
 }
+
+// function generateMove() {
+//     const move = bestMove(gameBoard, Number(depth));
+//     if (move) {
+//         seti1(move[0]);
+//         setj1(move[1]);
+//         seti2(move[2]);
+//         setj2(move[3]);
+//         gameBoard.promotedPiece = move[4];
+//     }
+// }
+
+// useEffect(() => {
+//     if (computer === "true" && realTurn % 2 !== Number(player)) {
+//         generateMove();
+//     }
+// }, [next]);
