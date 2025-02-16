@@ -1,6 +1,3 @@
-require("dotenv").config();
-const PORT = process.env.PORT || 1234;
-
 require("./connection.js");
 
 const http = require("http");
@@ -10,6 +7,7 @@ const cors = require("cors");
 const { instrument } = require("@socket.io/admin-ui");
 
 const app = express();
+const PORT = process.env.PORT || 1234;
 
 const server = http.createServer(app);
 
@@ -31,8 +29,4 @@ instrument(io, {
 const gamesRouter = require("./routes/games")(io);
 app.use("/games", gamesRouter);
 
-console.log(`Assigning port ${process.env.PORT}`);
-
-server.listen(process.env.PORT || 1234, "0.0.0.0", () => {
-    console.log(`Server is running on port ${process.env.PORT || 1234}`);
-});
+server.listen(PORT, () => console.log(`Listening on ${PORT}...`));
