@@ -7,7 +7,7 @@ const cors = require("cors");
 const { instrument } = require("@socket.io/admin-ui");
 
 const app = express();
-const { PORT = 1234 } = process.env;
+const PORT = process.env.PORT || 1234;
 
 const server = http.createServer(app);
 
