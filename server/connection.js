@@ -12,12 +12,12 @@ const db = mongoose.connection;
 
 db.dropCollection("games")
     .then(() => {
-        // console.log("games collection dropped");
+        console.log("games collection dropped");
     })
     .catch((err) => console.log(err));
 
 db.createCollection("games")
     .then(() => {
-        // console.log("games collection created");
+        console.log("games collection created");
     })
     .catch((err) => console.log(err));
