@@ -11,12 +11,12 @@ const PORT = process.env.PORT || 1234;
 
 const server = http.createServer(app);
 
-app.use(cors({ origin: ["http://localhost:3000", "https://chess-sz7n.onrender.com/"], credentials: true }));
+app.use(cors({ origin: ["http://localhost:3000", "https://chess-sz7n.onrender.com"], credentials: true }));
 app.use(express.json());
 
 const io = new Server(server, {
     cors: {
-        origin: ["http://localhost:3000", "https://admin.socket.io/", "https://chess-sz7n.onrender.com/"],
+        origin: ["http://localhost:3000", "https://admin.socket.io/", "https://chess-sz7n.onrender.com"],
         methods: ["GET"],
     },
 });
