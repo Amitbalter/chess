@@ -5,18 +5,4 @@ const api = axios.create({
     withCredentials: true,
 });
 
-// Log every request
-api.interceptors.request.use((request) => {
-    console.log("Sending Request:", request.method, request.url);
-    return request;
-});
-
-api.interceptors.response.use(
-    (response) => response,
-    (error) => {
-        console.error("API Error:", error);
-        return Promise.reject(error);
-    }
-);
-
 export default api;
