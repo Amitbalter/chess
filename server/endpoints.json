@@ -1,0 +1,18 @@
+{
+    "GET /api/game/:id": {
+        "description": "serves the game corresponding to the id",
+        "queries": ["turn"],
+        "exampleResponse": {
+            "array": [],
+            "turn": 0
+        }
+    },
+
+    "POST /api/game/:id": {
+        "description": "modifies the game object in server",
+        "exampleResponse": {
+            "array": [],
+            "turn": 0
+        }
+    }
+}

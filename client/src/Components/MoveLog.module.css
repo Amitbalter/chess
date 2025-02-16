@@ -1,0 +1,58 @@
+.movelog {
+    flex: 2;
+    width: 300px;
+    /* padding-top: 10px; */
+
+    display: grid;
+    grid-template-columns: 1fr 6fr;
+
+    background-color: rgba(203, 162, 92, 0.8);
+    text-decoration: none;
+    border-radius: 5%;
+
+    overflow: auto;
+    scrollbar-gutter: stable;
+}
+
+.movelog::-webkit-scrollbar {
+    display: none;
+}
+
+.moves {
+    height: fit-content;
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.turns {
+    height: fit-content;
+    padding-left: 10px;
+}
+
+.turn {
+    flex: 1;
+    height: 30px;
+    font-size: large;
+
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+.move {
+    height: 30px;
+    border: None;
+    padding-left: 5px;
+    background-color: transparent;
+    font-size: large;
+
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+.move:hover {
+    cursor: pointer;
+    background-color: rgba(203, 162, 92);
+}
