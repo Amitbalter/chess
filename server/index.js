@@ -1,3 +1,6 @@
+require("dotenv").config();
+const PORT = process.env.PORT || 1234;
+
 require("./connection.js");
 
 const http = require("http");
@@ -7,7 +10,6 @@ const cors = require("cors");
 const { instrument } = require("@socket.io/admin-ui");
 
 const app = express();
-const PORT = process.env.PORT || 1234;
 
 const server = http.createServer(app);
 
