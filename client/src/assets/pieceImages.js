@@ -1,0 +1,12 @@
+export { default as whiteP } from "./pieceImages/whitePawn.png";
+export { default as whiteN } from "./pieceImages/whiteKnight.png";
+export { default as whiteB } from "./pieceImages/whiteBishop.png";
+export { default as whiteR } from "./pieceImages/whiteRook.png";
+export { default as whiteK } from "./pieceImages/whiteKing.png";
+export { default as whiteQ } from "./pieceImages/whiteQueen.png";
+export { default as blackP } from "./pieceImages/blackPawn.png";
+export { default as blackN } from "./pieceImages/blackKnight.png";
+export { default as blackB } from "./pieceImages/blackBishop.png";
+export { default as blackR } from "./pieceImages/blackRook.png";
+export { default as blackK } from "./pieceImages/blackKing.png";
+export { default as blackQ } from "./pieceImages/blackQueen.png";

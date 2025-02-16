@@ -1,23 +1,23 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useContext, useState, lazy } from "react";
+import api from "../api";
 import { Link, useParams } from "react-router-dom";
 import Topbar from "./Topbar";
 import Square from "./Square";
 import Clock from "./Clock";
 import MoveLog from "./MoveLog";
 import classes from "./Game.module.css";
+import { SocketContext } from "./SocketContext";
 
 export default function Game() {
+    const socket = useContext(SocketContext);
     const { id } = useParams();
 
-    const [player, setPlayer] = useState(0);
+    const [player, setPlayer] = useState(null);
     const [computer, setComputer] = useState("false");
-
-    const [time1, setTime1] = useState(null);
-    const [time2, setTime2] = useState(null);
 
     const [boardColors, setBoardColors] = useState(Array(8).fill(Array(8).fill("")));
     const [boardDisabled, setBoardDisabled] = useState(false);
-    const [flip, setFlip] = useState(1 - player);
+    const [flip, setFlip] = useState(1);
     const [redoColor, setRedoColor] = useState("");
     const [message, setMessage] = useState("");
     const [moves, setMoves] = useState([]);
@@ -30,27 +30,43 @@ export default function Game() {
     const [j1, setj1] = useState(null);
     const [i2, seti2] = useState(null);
     const [j2, setj2] = useState(null);
-    const [next, setNext] = useState(0);
     const [prev, setPrev] = useState(null);
     const [turn, setTurn] = useState(null);
     const [realTurn, setRealTurn] = useState(null);
-    const [restart, setRestart] = useState(false);
     const [promotedPiece, setPromotedPiece] = useState(null);
 
+    function handleMove(data) {
+        setBoard(data);
+        setPrev(data.lastMove);
+        setTurn(data.turn);
+        setRealTurn(data.turn);
+        setMoves(data.movelog);
+        setBoardDisabled(false);
+        resetInputs();
+        setMessage("");
+    }
+
     useEffect(() => {
-        fetch(`/games/${id}`)
-            .then((response) => {
-                return response.json();
-            })
-            .then((data) => {
-                setBoard(data.board);
-                setPrev(data.board.lastMove);
-                setTurn(data.board.turn);
-                setRealTurn(data.board.turn);
-                setMoves(data.board.movelog);
-                setTime1(data.time[0]);
-                setTime2(data.time[1]);
-            });
+        socket.emit("join-room", id, async (position) => {
+            try {
+                const response = await api.get(`/games/${id}`);
+                const player = response.data.player;
+                handleMove(response.data.board);
+                if (position !== null) {
+                    setPlayer([player, 1 - player][position]);
+                    setFlip([1 - player, player][position]);
+                }
+            } catch (err) {
+                console.log(err);
+            }
+        });
+
+        socket.on("move", (data) => handleMove(data));
+
+        return () => {
+            socket.emit("leave-room", id);
+            socket.off("move");
+        };
     }, []);
 
     function resetInputs() {
@@ -69,125 +85,69 @@ export default function Game() {
                 turns = 2;
             }
             if (turns) {
-                fetch(`/games/${id}`, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ takeback: turns, time: [time1, time2] }),
-                })
-                    .then((res) => res.json())
-                    .then((data) => {
-                        setBoard(data);
-                        setPrev(data.lastMove);
-                        setTurn(data.turn);
-                        setRealTurn(data.turn);
-                        setMoves(data.movelog);
-                        resetInputs();
-                        setPromotedPiece(null);
-                        setMessage("");
-                    })
-                    .catch((error) => console.error("Error patching data:", error));
+                api.patch(`/games/${id}`, { takeback: turns });
             }
         }
     }
 
     function reCreate(turn) {
-        fetch(`/games/${id}?turn=${turn}`)
-            .then((res) => res.json())
-            .then((data) => {
-                setBoard(data.board);
-                setPrev(data.board.lastMove);
-                setTurn(turn);
-            });
+        api.get(`/games/${id}?turn=${turn}`).then((response) => {
+            setBoard(response.data.board);
+            setPrev(response.data.board.lastMove);
+            setTurn(turn);
+        });
     }
 
     function setInput(index) {
-        const [i, j] = [index[0], index[1]];
-        const row = [i, 7 - i][flip];
-        const col = [j, 7 - j][flip];
-        //setting input1 and input2
-        if (i1 === null) {
-            // check correct color according to turn
-            if (board.array[row][col].piece.color === colors[realTurn % 2]) {
-                seti1(row);
-                setj1(col);
-                setMessage("");
-            } else {
-                setMessage(`It is ${colors[realTurn % 2]}'s turn to play`);
-            }
-        }
-        //if second square is same piece of same colour then change input1 to new piece
-        else if (i1 !== null) {
-            const piece1 = board.array[i1][j1].piece;
-            if (piece1.moves.includes([row, col].join(""))) {
-                if (piece1.label === "P" && row === [7, 0][realTurn % 2]) {
-                    setPromotedPiece("required");
-                    setBoardDisabled(true);
-                }
-                seti2(row);
-                setj2(col);
-            } else if (board.array[row][col].piece.color === colors[realTurn % 2]) {
-                if (i1 !== row || j1 !== col) {
+        if (player === realTurn % 2) {
+            const [i, j] = [index[0], index[1]];
+            const row = [i, 7 - i][flip];
+            const col = [j, 7 - j][flip];
+            //setting input1 and input2
+            if (i1 === null) {
+                // check correct color according to turn
+                if (board.array[row][col].piece.color === colors[realTurn % 2]) {
                     seti1(row);
                     setj1(col);
+                    setMessage("");
+                } else {
+                    setMessage(`It is ${colors[realTurn % 2]}'s turn to play`);
+                }
+            }
+            //if second square is same piece of same colour then change input1 to new piece
+            else if (i1 !== null) {
+                const piece1 = board.array[i1][j1].piece;
+                if (piece1.moves.includes([row, col].join(""))) {
+                    if (piece1.label === "P" && row === [7, 0][realTurn % 2]) {
+                        setPromotedPiece("required");
+                        setBoardDisabled(true);
+                    }
+                    seti2(row);
+                    setj2(col);
+                } else if (board.array[row][col].piece.color === colors[realTurn % 2]) {
+                    if (i1 !== row || j1 !== col) {
+                        seti1(row);
+                        setj1(col);
+                    } else {
+                        seti1(null);
+                        seti1(null);
+                    }
                 } else {
                     seti1(null);
                     seti1(null);
                 }
-            } else {
-                seti1(null);
-                seti1(null);
             }
         }
     }
 
-    useEffect(() => {
-        if (restart) {
-            setBoardColors(Array(8).fill(Array(8).fill("")));
-            resetInputs();
-            setNext(1 - next);
-            setBoardDisabled(false);
-            setMessage("");
-            setRestart(false);
-            fetch(`/games/${id}`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ takeback: realTurn }),
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    setBoard(data);
-                    setPrev(data.lastMove);
-                    setTurn(data.turn);
-                    setRealTurn(data.turn);
-                    setMoves(data.movelog);
-                })
-                .catch((error) => console.error("Error patching data:", error));
-        }
-    }, [restart]);
+    function restart() {
+        api.patch(`/games/${id}`, { takeback: realTurn });
+    }
 
     //making the move and updating the board according to the outcome
     useEffect(() => {
         if (i2 !== null && j2 !== null && promotedPiece != "required") {
-            fetch(`/games/${id}`, {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ move: [i1, j1, i2, j2, promotedPiece], time: [time1, time2] }),
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    setBoard(data);
-                    setPrev(data.lastMove);
-                    setTurn(data.turn);
-                    setRealTurn(data.turn);
-                    setMoves(data.movelog);
-                    // setTime1(data.time[0]);
-                    // setTime2(data.time[1]);
-                    resetInputs();
-                })
-                .catch((error) => console.error("Error patching data:", error));
-            setMessage("");
+            api.patch(`/games/${id}`, { move: [i1, j1, i2, j2, promotedPiece] });
 
             // if (comp === null) setFlip(1-flip)
         }
@@ -202,7 +162,6 @@ export default function Game() {
         if (prev !== null) {
             dummyColors[prev[0]][prev[1]] = "rgb(72, 111, 197)";
             dummyColors[prev[2]][prev[3]] = "rgba(68, 114, 212, 0.8)";
-            setNext(1 - next);
         }
         if ((computer === "true" && realTurn % 2 === Number(player)) || computer === "false") {
             if (i1 !== null && j1 !== null) {
@@ -266,7 +225,7 @@ export default function Game() {
             <Topbar />
             <div className={classes.game}>
                 <div className={classes.left}>
-                    <Clock turn={realTurn} flip={flip} time1={time1} time2={time2} setTime1={setTime1} setTime2={setTime2} restart={restart} />
+                    {/* <Clock turn={realTurn} flip={flip} time1={time1} time2={time2} setTime1={setTime1} setTime2={setTime2} restart={restart} /> */}
                 </div>
                 <div className={classes.board}>
                     {board ? (
@@ -313,14 +272,14 @@ export default function Game() {
                         <button className={classes.option} onClick={() => setFlip(1 - flip)}>
                             Flip Board
                         </button>
-                        <button className={classes.option} onClick={() => setRestart(restart + 1)}>
+                        <button className={classes.option} onClick={() => restart()}>
                             Restart
                         </button>
                         <button
                             className={classes.option}
                             onClick={() => {
                                 setMessage(`${colors[player]} resigns, game is over`);
-                                setRestart(true);
+                                restart();
                             }}
                         >
                             Resign
@@ -367,6 +326,6 @@ export default function Game() {
 
 // useEffect(() => {
 //     if (computer === "true" && realTurn % 2 !== Number(player)) {
-//         generateMove();
+//         generateMove();player
 //     }
 // }, [next]);

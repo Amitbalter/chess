@@ -1,7 +1,7 @@
 .movelog {
     flex: 2;
     width: 300px;
-    padding-top: 10px;
+    /* padding-top: 10px; */
 
     display: grid;
     grid-template-columns: 1fr 6fr;

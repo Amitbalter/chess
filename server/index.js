@@ -1,31 +1,32 @@
-require("dotenv").config();
+require("./connection.js");
 
+const http = require("http");
 const express = require("express");
+const { Server } = require("socket.io");
+const cors = require("cors");
+const { instrument } = require("@socket.io/admin-ui");
+
 const app = express();
-
-const mongoose = require("mongoose");
-mongoose.connect(process.env.DATABASE_URL);
-const db = mongoose.connection;
-db.on("error", (error) => console.error(error));
-db.once("open", () => console.log("Connected to Database"));
-
-db.dropCollection("games")
-    .then((success) => {
-        // console.log(success);
-    })
-    .catch((err) => console.log(err));
-
-db.createCollection("games")
-    .then((success) => {
-        // console.log(success);
-    })
-    .catch((err) => console.log(err));
-
-app.use(express.json());
-
-const gamesRouter = require("./routes/games");
-app.use("/games", gamesRouter);
-
 const { PORT = 1234 } = process.env;
 
-app.listen(PORT, () => console.log(`Listening on ${PORT}...`));
+const server = http.createServer(app);
+
+app.use(cors({ origin: "http://localhost:3000", credentials: true }));
+app.use(express.json());
+
+const io = new Server(server, {
+    cors: {
+        origin: ["http://localhost:3000", "https://admin.socket.io/"],
+        methods: ["GET"],
+    },
+});
+
+instrument(io, {
+    auth: false,
+    mode: "development",
+});
+
+const gamesRouter = require("./routes/games")(io);
+app.use("/games", gamesRouter);
+
+server.listen(PORT, () => console.log(`Listening on ${PORT}...`));

@@ -1,15 +1,19 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
+import api from "../api";
 import { useNavigate } from "react-router-dom";
 import Topbar from "./Topbar";
 import classes from "./Home.module.css";
+import { SocketContext } from "./SocketContext";
 
 export default function Home() {
+    const socket = useContext(SocketContext);
+
     const navigate = useNavigate();
 
     const [create, setCreate] = useState(null);
     const [start, setStart] = useState(false);
 
-    const [color, setColor] = useState(null);
+    const [player, setPlayer] = useState(null);
     const [mode, setMode] = useState(null);
     const [timeLimit, setTimeLimit] = useState(null);
     const [depth, setDepth] = useState(null);
@@ -25,46 +29,38 @@ export default function Home() {
         if (create === true) {
             setId(null);
         } else if (create === false) {
-            setColor(null);
+            setPlayer(null);
             setMode(null);
             setTimeLimit(null);
             setDepth(null);
-            if (!games.length) {
-                fetch(`/games`)
-                    .then((response) => response.json())
-                    .then((data) => {
-                        setGames(data);
-                    });
-            }
+
+            socket.on("games", (games) => setGames(games));
+            api.get("/games")
+                .then((data) => setGames(data.data))
+                .catch((err) => console.log(err));
         }
         setStart(false);
     }, [create]);
 
     useEffect(() => {
-        if (color !== null && timeLimit !== null && ((mode === "computer" && depth !== null) || mode === "online" || mode === "offline")) {
+        if (player !== null && timeLimit !== null && ((mode === "computer" && depth !== null) || mode === "online" || mode === "offline")) {
             setStart(true);
         } else {
             setStart(false);
         }
-    }, [color, mode, timeLimit, depth]);
+    }, [player, mode, timeLimit, depth]);
 
     async function handleStart() {
         if (start) {
             if (id) navigate(`game/${id}`);
             else {
-                const response = await fetch(`/games`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        color: color,
-                        timeLimit: timeLimit,
-                        depth: depth,
-                    }),
+                const response = await api.post("/games", {
+                    player: player,
+                    timeLimit: timeLimit,
+                    depth: depth,
                 });
-                const path = await response.json();
-                navigate(`game/${path}`);
+
+                navigate(`game/${response.data}`);
             }
         }
     }
@@ -84,10 +80,10 @@ export default function Home() {
             {create === true ? (
                 <div className={classes.optionmenu}>
                     <div className={classes.options}>
-                        <button onClick={() => setColor(0)} className={classes.option} style={changeOptionColor(color, 0)}>
+                        <button onClick={() => setPlayer(0)} className={classes.option} style={changeOptionColor(player, 0)}>
                             White
                         </button>
-                        <button onClick={() => setColor(1)} className={classes.option} style={changeOptionColor(color, 1)}>
+                        <button onClick={() => setPlayer(1)} className={classes.option} style={changeOptionColor(player, 1)}>
                             Black
                         </button>
                     </div>
@@ -160,7 +156,7 @@ export default function Home() {
                 <>
                     <div className={classes.gamelog}>
                         <div className={classes.header}>
-                            <p align="center">Color</p>
+                            <p align="center">player</p>
                             <p align="center">Time Limit</p>
                         </div>
                         {games.map((game, index) => (
@@ -173,7 +169,7 @@ export default function Home() {
                                 }}
                                 style={changeOptionColor(id, game._id)}
                             >
-                                <p>{["White", "Black"][game.color]}</p>
+                                <p>{["White", "Black"][game.player]}</p>
                                 <p>{game.timeLimit}</p>
                             </button>
                         ))}
