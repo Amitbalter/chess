@@ -29,4 +29,6 @@ instrument(io, {
 const gamesRouter = require("./routes/games")(io);
 app.use("/games", gamesRouter);
 
-server.listen(PORT, () => console.log(`Listening on ${PORT}...`));
+server.listen(process.env.PORT || 1234, "0.0.0.0", () => {
+    console.log(`Server is running on port ${process.env.PORT || 1234}`);
+});
