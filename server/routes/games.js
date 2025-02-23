@@ -43,7 +43,12 @@ module.exports = (io) => {
             const movesQuery = db.query(`SELECT * FROM moves WHERE game_id = $1`, [room]);
 
             Promise.all([gamesQuery, movesQuery]).then(([gamesRes, movesRes]) => {
-                cb(position, gamesRes.rows[0].player, movesRes.rows);
+                const { mode, time_limit, player, depth } = gamesRes.rows[0];
+                const moves = movesRes.rows;
+                cb(mode, time_limit, position, player, moves);
+                if (position === 1) {
+                    io.in(room).emit("start");
+                }
             });
         });
 

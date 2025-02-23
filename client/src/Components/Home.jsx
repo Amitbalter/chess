@@ -126,7 +126,7 @@ export default function Home() {
                         </button>
                     </div>
                     <div className={classes.options}>
-                        <button onClick={() => setTimeLimit(false)} className={classes.option} style={changeOptionColor(timeLimit, false)}>
+                        <button onClick={() => setTimeLimit(0)} className={classes.option} style={changeOptionColor(timeLimit, 0)}>
                             No limit
                         </button>
                         <button onClick={() => setTimeLimit(1)} className={classes.option} style={changeOptionColor(timeLimit, 1)}>
@@ -165,6 +165,7 @@ export default function Home() {
                         <div className={classes.header}>
                             <p align="center">player</p>
                             <p align="center">Time Limit</p>
+                            <p align="center">Mode</p>
                         </div>
                         {games.map((game, index) => (
                             <button
@@ -178,6 +179,7 @@ export default function Home() {
                             >
                                 <p>{["White", "Black"][game.player]}</p>
                                 <p>{game.time_limit}</p>
+                                <p>{game.mode}</p>
                             </button>
                         ))}
                     </div>

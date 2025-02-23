@@ -10,6 +10,11 @@ import { SocketContext } from "./SocketContext";
 import Board from "../dynamics/board";
 
 export default function Game() {
+    const [mode, setMode] = useState(null);
+    const [timeLimit, setTimeLimit] = useState(null);
+    const [restart, setRestart] = useState(0);
+    const [start, setStart] = useState(false);
+
     const socket = useContext(SocketContext);
     const { id } = useParams();
 
@@ -38,7 +43,7 @@ export default function Game() {
     const [prev, setPrev] = useState(null);
     const [turn, setTurn] = useState(null);
     const [realTurn, setRealTurn] = useState(null);
-    const [promotedPiece, setPromotedPiece] = useState(null);
+    const [promoted, setPromoted] = useState(null);
 
     function handleMove(data) {
         setPrev(data.lastMove);
@@ -52,10 +57,14 @@ export default function Game() {
     }
 
     useEffect(() => {
-        socket.emit("join-room", id, (position, player, moves) => {
-            if (position !== null) {
+        socket.emit("join-room", id, (mode, timeLimit, position, player, moves) => {
+            setMode(mode);
+            setTimeLimit(timeLimit);
+            if (mode === "online" && position !== null) {
                 setPlayer([player, 1 - player][position]);
                 setFlip([1 - player, player][position]);
+            } else if (mode !== "online" && position === 0) {
+                setPlayer(0);
             }
             const dummy = new Board();
             dummy.setupBoard();
@@ -73,6 +82,10 @@ export default function Game() {
 
         socket.on("takeback", (data) => {
             setTakeback(data.takeback);
+        });
+
+        socket.on("start", () => {
+            setStart(true);
         });
 
         return () => {
@@ -124,13 +137,15 @@ export default function Game() {
         setTurn(turn);
     }
 
-    function restart() {
+    function handleRestart() {
         setTakeback(realTurn);
         socket.emit("makeTakeback", { takeback: realTurn });
+        setRestart((restart) => restart + 1);
     }
 
     function setInput(index) {
-        if (player === realTurn % 2) {
+        // console.log(mode, player);
+        if ((mode === "online" && player === realTurn % 2) || (mode !== "online" && player === 0)) {
             const [i, j] = [index[0], index[1]];
             const row = [i, 7 - i][flip];
             const col = [j, 7 - j][flip];
@@ -150,7 +165,7 @@ export default function Game() {
                 const piece1 = board.array[i1][j1].piece;
                 if (piece1.moves.includes([row, col].join(""))) {
                     if (piece1.label === "P" && row === [7, 0][realTurn % 2]) {
-                        setPromotedPiece("required");
+                        setPromoted("required");
                         setBoardDisabled(true);
                     }
                     seti2(row);
@@ -173,16 +188,16 @@ export default function Game() {
 
     //making the move and updating the board according to the outcome
     useEffect(() => {
-        if (i2 !== null && j2 !== null && promotedPiece != "required") {
-            setMove([i1, j1, i2, j2, promotedPiece]);
-            socket.emit("makemove", { turn: realTurn, move: [i1, j1, i2, j2, promotedPiece] });
+        if (i2 !== null && j2 !== null && promoted != "required") {
+            setMove([i1, j1, i2, j2, promoted]);
+            socket.emit("makemove", { turn: realTurn, move: [i1, j1, i2, j2, promoted] });
 
             // if (comp === null) setFlip(1-flip)
         }
         if (computer === "true") {
             setBoardDisabled(realTurn % 2 !== Number(player));
         }
-    }, [i2, j2, promotedPiece]);
+    }, [i2, j2, promoted]);
 
     //changing colors on board
     useEffect(() => {
@@ -253,7 +268,7 @@ export default function Game() {
             <Topbar />
             <div className={classes.game}>
                 <div className={classes.left}>
-                    {/* <Clock turn={realTurn} flip={flip} time1={time1} time2={time2} setTime1={setTime1} setTime2={setTime2} restart={restart} /> */}
+                    <Clock turn={realTurn} flip={flip} timeLimit={timeLimit} start={start} restart={restart} />
                 </div>
                 <div className={classes.board}>
                     {board ? (
@@ -300,14 +315,14 @@ export default function Game() {
                         <button className={classes.option} onClick={() => setFlip(1 - flip)}>
                             Flip Board
                         </button>
-                        <button className={classes.option} onClick={() => restart()}>
+                        <button className={classes.option} onClick={() => handleRestart()}>
                             Restart
                         </button>
                         <button
                             className={classes.option}
                             onClick={() => {
                                 setMessage(`${colors[player]} resigns, game is over`);
-                                restart();
+                                handleRestart();
                             }}
                         >
                             Resign
@@ -316,7 +331,7 @@ export default function Game() {
                 </div>
             </div>
             <div className={classes.console}>
-                {promotedPiece === "required" ? (
+                {promoted === "required" ? (
                     <div className={classes.promotion}>
                         {["Q", "R", "B", "N"].map((label) => {
                             return (
@@ -324,7 +339,7 @@ export default function Game() {
                                     key={label}
                                     index={label}
                                     setInput={() => {
-                                        setPromotedPiece(label);
+                                        setPromoted(label);
                                     }}
                                     color="transparent"
                                     piece={label}
@@ -348,7 +363,7 @@ export default function Game() {
 //         setj1(move[1]);
 //         seti2(move[2]);
 //         setj2(move[3]);
-//         gameBoard.promotedPiece = move[4];
+//         gameBoard.promoted = move[4];
 //     }
 // }
 
