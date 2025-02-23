@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import api from "../api";
 import { useNavigate } from "react-router-dom";
 import Topbar from "./Topbar";
@@ -34,9 +34,14 @@ export default function Home() {
             setTimeLimit(null);
             setDepth(null);
 
-            socket.on("games", (games) => setGames(games));
+            socket.on("newgame", (newgame) => {
+                setGames((games) => [...games, newgame]);
+            });
+
             api.get("/games")
-                .then((data) => setGames(data.data))
+                .then((data) => {
+                    setGames(data.data);
+                })
                 .catch((err) => console.log(err));
         }
         setStart(false);
@@ -55,11 +60,12 @@ export default function Home() {
             if (id) navigate(`game/${id}`);
             else {
                 const response = await api.post("/games", {
+                    mode: mode,
                     player: player,
                     timeLimit: timeLimit,
                     depth: depth,
                 });
-
+                console.log(response);
                 navigate(`game/${response.data}`);
             }
         }
@@ -164,13 +170,13 @@ export default function Home() {
                                 key={index}
                                 className={classes.game}
                                 onClick={() => {
-                                    setId(game._id);
+                                    setId(game.game_id);
                                     setStart(true);
                                 }}
-                                style={changeOptionColor(id, game._id)}
+                                style={changeOptionColor(id, game.game_id)}
                             >
                                 <p>{["White", "Black"][game.player]}</p>
-                                <p>{game.timeLimit}</p>
+                                <p>{game.time_limit}</p>
                             </button>
                         ))}
                     </div>

@@ -1,6 +1,6 @@
-const { Piece } = require("./piece.js");
+import Piece from "./piece";
 
-class Rook extends Piece {
+export default class Rook extends Piece {
     constructor(color) {
         super(color);
         this.label = "R";
@@ -87,5 +87,3 @@ class Rook extends Piece {
         }
     }
 }
-
-module.exports = { Rook };

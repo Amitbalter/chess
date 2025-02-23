@@ -7,6 +7,7 @@ import Clock from "./Clock";
 import MoveLog from "./MoveLog";
 import classes from "./Game.module.css";
 import { SocketContext } from "./SocketContext";
+import Board from "../dynamics/board";
 
 export default function Game() {
     const socket = useContext(SocketContext);
@@ -17,7 +18,7 @@ export default function Game() {
 
     const [boardColors, setBoardColors] = useState(Array(8).fill(Array(8).fill("")));
     const [boardDisabled, setBoardDisabled] = useState(false);
-    const [flip, setFlip] = useState(1);
+    const [flip, setFlip] = useState(null);
     const [redoColor, setRedoColor] = useState("");
     const [message, setMessage] = useState("");
     const [moves, setMoves] = useState([]);
@@ -25,6 +26,9 @@ export default function Game() {
     const [board, setBoard] = useState(null);
 
     const colors = ["white", "black"];
+
+    const [game, setGame] = useState(null);
+    const [move, setMove] = useState(null);
 
     const [i1, seti1] = useState(null);
     const [j1, setj1] = useState(null);
@@ -36,38 +40,49 @@ export default function Game() {
     const [promotedPiece, setPromotedPiece] = useState(null);
 
     function handleMove(data) {
-        setBoard(data);
         setPrev(data.lastMove);
         setTurn(data.turn);
         setRealTurn(data.turn);
         setMoves(data.movelog);
+        setBoard(data);
         setBoardDisabled(false);
         resetInputs();
         setMessage("");
     }
 
     useEffect(() => {
-        socket.emit("join-room", id, async (position) => {
-            try {
-                const response = await api.get(`/games/${id}`);
-                const player = response.data.player;
-                handleMove(response.data.board);
-                if (position !== null) {
-                    setPlayer([player, 1 - player][position]);
-                    setFlip([1 - player, player][position]);
-                }
-            } catch (err) {
-                console.log(err);
+        socket.emit("join-room", id, (position, player, moves) => {
+            console.log(moves);
+            if (position !== null) {
+                setPlayer([player, 1 - player][position]);
+                setFlip([1 - player, player][position]);
             }
+            const dummy = new Board();
+            dummy.setupBoard();
+            for (let move of moves) {
+                const { i1, j1, i2, j2, promoted } = move;
+                dummy.makeMove(i1, j1, i2, j2, promoted);
+            }
+            setGame(dummy);
+            handleMove(dummy);
         });
 
-        socket.on("move", (data) => handleMove(data));
+        socket.on("move", (data) => {
+            setMove(data.move);
+        });
 
         return () => {
             socket.emit("leave-room", id);
             socket.off("move");
         };
     }, []);
+
+    useEffect(() => {
+        if (move) {
+            game.makeMove(...move);
+            handleMove(game);
+        }
+    }, [move]);
 
     function resetInputs() {
         seti1(null);
@@ -147,7 +162,10 @@ export default function Game() {
     //making the move and updating the board according to the outcome
     useEffect(() => {
         if (i2 !== null && j2 !== null && promotedPiece != "required") {
-            api.patch(`/games/${id}`, { move: [i1, j1, i2, j2, promotedPiece] });
+            setMove([i1, j1, i2, j2, promotedPiece]);
+
+            // api.patch(`/games/${id}`, { move: [realTurn, i1, j1, i2, j2, promotedPiece] });
+            socket.emit("makemove", { turn: realTurn, move: [i1, j1, i2, j2, promotedPiece] });
 
             // if (comp === null) setFlip(1-flip)
         }

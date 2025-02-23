@@ -1,10 +1,10 @@
-const { Pawn } = require("./pawn.js");
-const { Rook } = require("./rook.js");
-const { Knight } = require("./knight.js");
-const { Bishop } = require("./bishop.js");
-const { Queen } = require("./queen.js");
-const { King } = require("./king.js");
-const { Empty } = require("./empty.js");
+import Pawn from "./pawn.js";
+import Rook from "./rook.js";
+import Knight from "./knight.js";
+import Bishop from "./bishop.js";
+import Queen from "./queen.js";
+import King from "./king.js";
+import Empty from "./empty.js";
 
 class square {
     constructor(color, position, piece) {
@@ -14,7 +14,7 @@ class square {
     }
 }
 
-class Board {
+export default class Board {
     constructor() {
         this.array = Array.from({ length: 8 }).map((_, i) =>
             Array.from({ length: 8 }).map((_, j) => {
@@ -228,5 +228,3 @@ class Board {
         }
     }
 }
-
-module.exports = { Board };

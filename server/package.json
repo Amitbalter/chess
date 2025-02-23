@@ -4,7 +4,9 @@
     "main": "index.js",
     "scripts": {
         "start": "node index.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "setup-dbs": "psql -f ./db/setup.sql",
+        "seed": "node ./db/seeds/run-seed.js",
+        "seed-prod": "NODE_ENV=production npm run seed"
     },
     "keywords": [],
     "author": "",
@@ -15,6 +17,7 @@
         "express": "^4.21.2",
         "http": "^0.0.1-security",
         "mongoose": "^8.10.0",
+        "pg-format": "^1.0.4",
         "socket.io": "^4.8.1"
     },
     "devDependencies": {

@@ -54,8 +54,6 @@ function valuation(board) {
     return valuation;
 }
 
-function bestMove(board, depth) {
+export default function bestMove(board, depth) {
     return bestPosition(board, depth)[0];
 }
-
-module.exports = { bestMove };

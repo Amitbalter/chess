@@ -1,6 +1,6 @@
-const { Empty } = require("./empty.js");
+import Empty from "./empty";
 
-class Piece {
+export default class Piece {
     constructor(color) {
         this.color = color;
         this.castle = "N";
@@ -48,5 +48,3 @@ class Piece {
         } else this.moves.push([row, col].join(""));
     }
 }
-
-module.exports = { Piece };

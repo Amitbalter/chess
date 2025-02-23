@@ -1,11 +1,11 @@
-const { Rook } = require("./rook.js");
-const { Knight } = require("./knight.js");
-const { Bishop } = require("./bishop.js");
-const { Queen } = require("./queen.js");
-const { Empty } = require("./empty.js");
-const { Piece } = require("./piece.js");
+import Rook from "./rook.js";
+import Knight from "./knight.js";
+import Bishop from "./bishop.js";
+import Queen from "./queen.js";
+import Empty from "./empty.js";
+import Piece from "./piece.js";
 
-class Pawn extends Piece {
+export default class Pawn extends Piece {
     constructor(color) {
         super(color);
         this.label = "P";
@@ -82,5 +82,3 @@ class Pawn extends Piece {
         }
     }
 }
-
-module.exports = { Pawn };

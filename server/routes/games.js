@@ -1,27 +1,25 @@
 const express = require("express");
+const format = require("pg-format");
 const router = express.Router();
-const { Board } = require("../dynamics/board");
-const Game = require("../models/game");
+const db = require("../db/connection");
 
 module.exports = (io) => {
     const rooms = {};
     const sockets = {};
 
-    function joinRoom(room, socket, cb) {
+    function joinRoom(room, socket) {
         if (!rooms[room]) {
             rooms[room] = [null, null];
         }
 
         if (sockets[socket.id] !== room) {
             const index = rooms[room].indexOf(null);
+            rooms[room][index] = socket.id;
+            sockets[socket.id] = room;
             if (index !== -1) {
-                rooms[room][index] = socket.id;
-                sockets[socket.id] = room;
-                cb(index);
+                return index;
             } else {
-                rooms[room][index] = socket.id;
-                sockets[socket.id] = room;
-                cb(null);
+                return null;
             }
         }
     }
@@ -37,9 +35,16 @@ module.exports = (io) => {
     }
 
     io.on("connection", (socket) => {
-        socket.on("join-room", async (room, cb) => {
+        socket.on("join-room", (room, cb) => {
             socket.join(room);
-            joinRoom(room, socket, cb);
+            const position = joinRoom(room, socket);
+
+            const gamesQuery = db.query(`SELECT * FROM games WHERE game_id = $1`, [room]);
+            const movesQuery = db.query(`SELECT * FROM moves WHERE game_id = $1`, [room]);
+
+            Promise.all([gamesQuery, movesQuery]).then(([gamesRes, movesRes]) => {
+                cb(position, gamesRes.rows[0].player, movesRes.rows);
+            });
         });
 
         socket.on("leave-room", (room) => {
@@ -52,83 +57,52 @@ module.exports = (io) => {
             socket.leave(room);
             leaveRoom(room, socket);
         });
+
+        socket.on("makemove", (data) => {
+            const room = sockets[socket.id];
+            socket.broadcast.emit("move", data);
+            db.query(
+                format(
+                    `INSERT INTO moves 
+            (game_id, turn, i1, j1, i2, j2, promoted)
+            VALUES %L RETURNING *;`,
+                    [[room, data.turn, ...data.move]]
+                )
+            ).catch((err) => {
+                res.status(400).send({ message: err.message });
+            });
+        });
     });
-
-    router.get("/:id", getGame, (req, res) => {
-        const turn = req.query.turn || res.game.board.turn;
-        const resObject = { ...res.game._doc };
-        resObject.board = resObject.board.history[turn];
-
-        return res.status(200).json(resObject);
-    });
-
-    async function getGame(req, res, next) {
-        let game;
-        try {
-            game = await Game.findById(req.params.id);
-            if (game === null) {
-                return res.status(404).json({ message: "cannot find game" });
-            }
-        } catch (err) {
-            return res.status(500).json({ message: err.message });
-        }
-
-        res.game = game;
-        next();
-    }
-
-    router.patch("/:id", getGame, async (req, res) => {
-        const { move, takeback } = req.body;
-        let game = new Board();
-        game = game.restore(res.game.board);
-        if (move) {
-            game.makeMove(...move);
-        }
-        if (takeback) {
-            game = game.revert(takeback);
-        }
-        try {
-            res.game.board = game;
-            const updatedGame = await res.game.save();
-            const turn = game.turn;
-            io.to(updatedGame.id).emit("move", updatedGame.board.history[turn]);
-            res.json(updatedGame.board.history[turn]);
-        } catch (err) {
-            res.status(400).json({ message: err.message });
-        }
-    });
-
-    router.delete("/", (req, res) => {});
 
     router.get("/", async (req, res) => {
-        try {
-            const games = await Game.find();
-            res.json(games);
-        } catch (err) {
-            res.status(500).json({ message: err.message });
-        }
+        return db
+            .query(`SELECT * FROM games;`)
+            .then((result) => {
+                res.status(200).json(result.rows);
+            })
+            .catch((err) => {
+                res.status(500).json({ message: err.message });
+            });
     });
 
     router.post("/", async (req, res) => {
-        const { player, timeLimit, depth } = req.body;
-        const board = new Board();
-        board.setupBoard();
+        const { mode, player, timeLimit, depth } = req.body;
 
-        const game = new Game({
-            board: board,
-            timeLimit: timeLimit,
-            player: player,
-            depth: depth,
-        });
-
-        try {
-            const newGame = await game.save();
-            res.status(201).json(newGame.id);
-        } catch (err) {
-            res.status(400).send({ message: err.message });
-        }
-        const games = await Game.find();
-        io.emit("games", games);
+        const queryStr = format(
+            `INSERT INTO games 
+            (mode, player, time_limit, depth)
+            VALUES %L RETURNING *;`,
+            [[mode, player, timeLimit, depth]]
+        );
+        return db
+            .query(queryStr)
+            .then((result) => {
+                res.status(201).json(result.rows[0].game_id);
+                io.emit("newgame", result.rows[0]);
+            })
+            .catch((err) => {
+                res.status(400).send({ message: err.message });
+            });
     });
 
     return router;
