@@ -1,5 +1,4 @@
 const http = require("http");
-const seed = require("./db/seeds/seed");
 const express = require("express");
 const { Server } = require("socket.io");
 const cors = require("cors");

@@ -5,7 +5,7 @@ const seed = () => {
     return db
         .query(`DROP TABLE IF EXISTS moves;`)
         .then(() => {
-            return db.query(`DROP TABLE IF EXISTS games`);
+            return db.query(`DROP TABLE IF EXISTS games;`);
         })
         .then(() => {
             return db.query(`
@@ -34,7 +34,5 @@ const seed = () => {
             return db.query(`CREATE INDEX idx_game_id ON moves(game_id)`);
         });
 };
-
-seed();
 
 module.exports = seed;
