@@ -1,11 +1,11 @@
 import React, { useEffect, useContext, useState, lazy } from "react";
-import api from "../api";
 import { Link, useParams } from "react-router-dom";
 import Topbar from "./Topbar";
 import Square from "./Square";
 import Clock from "./Clock";
 import MoveLog from "./MoveLog";
 import classes from "./Game.module.css";
+
 import { SocketContext } from "./SocketContext";
 import Board from "../dynamics/board";
 
@@ -88,6 +88,14 @@ export default function Game() {
         }
     }, [move]);
 
+    useEffect(() => {
+        if (takeback) {
+            game.restore(realTurn - takeback);
+            handleMove(game);
+        }
+        setTakeback(null);
+    }, [takeback]);
+
     function resetInputs() {
         seti1(null);
         seti2(null);
@@ -110,20 +118,15 @@ export default function Game() {
         }
     }
 
-    useEffect(() => {
-        if (takeback) {
-            game.restore(realTurn - takeback);
-            handleMove(game);
-        }
-        setTakeback(null);
-    }, [takeback]);
-
     function reCreate(turn) {
-        api.get(`/games/${id}?turn=${turn}`).then((response) => {
-            setBoard(response.data.board);
-            setPrev(response.data.board.lastMove);
-            setTurn(turn);
-        });
+        setBoard(game.history[turn]);
+        setPrev(game.history[turn].lastMove);
+        setTurn(turn);
+    }
+
+    function restart() {
+        setTakeback(realTurn);
+        socket.emit("makeTakeback", { takeback: realTurn });
     }
 
     function setInput(index) {
@@ -166,10 +169,6 @@ export default function Game() {
                 }
             }
         }
-    }
-
-    function restart() {
-        api.patch(`/games/${id}`, { takeback: realTurn });
     }
 
     //making the move and updating the board according to the outcome

@@ -101,9 +101,9 @@ module.exports = (io) => {
                 WHERE ctid IN (
                     SELECT ctid FROM moves
                     WHERE game_id = $1
-                    LIMIT 1 OFFSET (SELECT COUNT(*) FROM moves WHERE game_id = $1) - 1
+                    LIMIT $2 OFFSET (SELECT COUNT(*) FROM moves WHERE game_id = $1) - $2
                     );`,
-                [room]
+                [room, data.takeback]
             );
         });
     });
