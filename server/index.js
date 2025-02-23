@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 1234;
 
 const server = http.createServer(app);
 
-const allowedOrigins = ["http://localhost:3000", "https://admin.socket.io", "https://chess-sz7n.onrender.com"];
+const allowedOrigins = ["http://localhost:3000", "https://admin.socket.io", "https://chess-client-2upu.onrender.com"];
 
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
