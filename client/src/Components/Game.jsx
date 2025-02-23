@@ -18,7 +18,7 @@ export default function Game() {
 
     const [boardColors, setBoardColors] = useState(Array(8).fill(Array(8).fill("")));
     const [boardDisabled, setBoardDisabled] = useState(false);
-    const [flip, setFlip] = useState(null);
+    const [flip, setFlip] = useState(1);
     const [redoColor, setRedoColor] = useState("");
     const [message, setMessage] = useState("");
     const [moves, setMoves] = useState([]);
@@ -29,6 +29,7 @@ export default function Game() {
 
     const [game, setGame] = useState(null);
     const [move, setMove] = useState(null);
+    const [takeback, setTakeback] = useState(null);
 
     const [i1, seti1] = useState(null);
     const [j1, setj1] = useState(null);
@@ -52,7 +53,6 @@ export default function Game() {
 
     useEffect(() => {
         socket.emit("join-room", id, (position, player, moves) => {
-            console.log(moves);
             if (position !== null) {
                 setPlayer([player, 1 - player][position]);
                 setFlip([1 - player, player][position]);
@@ -69,6 +69,10 @@ export default function Game() {
 
         socket.on("move", (data) => {
             setMove(data.move);
+        });
+
+        socket.on("takeback", (data) => {
+            setTakeback(data.takeback);
         });
 
         return () => {
@@ -91,7 +95,7 @@ export default function Game() {
         setj2(null);
     }
 
-    function takeback() {
+    function handleTakeback() {
         if (turn === realTurn) {
             let turns;
             if (computer === "false" && realTurn >= 1) {
@@ -100,10 +104,19 @@ export default function Game() {
                 turns = 2;
             }
             if (turns) {
-                api.patch(`/games/${id}`, { takeback: turns });
+                setTakeback(turns);
+                socket.emit("makeTakeback", { takeback: turns });
             }
         }
     }
+
+    useEffect(() => {
+        if (takeback) {
+            game.restore(realTurn - takeback);
+            handleMove(game);
+        }
+        setTakeback(null);
+    }, [takeback]);
 
     function reCreate(turn) {
         api.get(`/games/${id}?turn=${turn}`).then((response) => {
@@ -163,8 +176,6 @@ export default function Game() {
     useEffect(() => {
         if (i2 !== null && j2 !== null && promotedPiece != "required") {
             setMove([i1, j1, i2, j2, promotedPiece]);
-
-            // api.patch(`/games/${id}`, { move: [realTurn, i1, j1, i2, j2, promotedPiece] });
             socket.emit("makemove", { turn: realTurn, move: [i1, j1, i2, j2, promotedPiece] });
 
             // if (comp === null) setFlip(1-flip)
@@ -267,7 +278,7 @@ export default function Game() {
                 <div className={classes.right}>
                     <MoveLog moves={moves} realTurn={realTurn} turn={turn} reCreate={reCreate} />
                     <div className={classes.options}>
-                        <button className={classes.option} onClick={takeback}>
+                        <button className={classes.option} onClick={handleTakeback}>
                             Takeback
                         </button>
                         <button

@@ -130,14 +130,21 @@ export default class Board {
         return copy;
     }
 
-    restore(arrangement) {
-        const copy = new Board();
-        copy.turn = arrangement.turn;
-        copy.enPassant = [...arrangement.enPassant];
-        copy.state = arrangement.state;
-        copy.lastMove = arrangement.lastMove;
-        copy.movelog = arrangement.movelog;
-        copy.history = arrangement.history;
+    restore(turn) {
+        const arrangement = this.history[turn];
+        this.array = Array.from({ length: 8 }).map((_, i) =>
+            Array.from({ length: 8 }).map((_, j) => {
+                return new square(["white", "black"][(i + j) % 2], [i, j], new Empty());
+            })
+        );
+        this.turn = arrangement.turn;
+        this.enPassant = [...arrangement.enPassant];
+        this.state = arrangement.state;
+        this.lastMove = arrangement.lastMove;
+        this.movelog = [...arrangement.movelog];
+        this.history = this.history.slice(0, this.turn + 1);
+        this.pieces = [[], []];
+        this.moves = [[], []];
         for (let k of [0, 1]) {
             for (let piece of arrangement.pieces[k]) {
                 const pieces = {
@@ -151,18 +158,11 @@ export default class Board {
                 const copyPiece = pieces[piece.label];
                 copyPiece.castle = piece.castle;
                 copyPiece.position = [...piece.position];
-                copy.pieces[k].push(copyPiece);
-                copy.array[copyPiece.position[0]][copyPiece.position[1]].piece = copyPiece;
+                this.pieces[k].push(copyPiece);
+                this.array[copyPiece.position[0]][copyPiece.position[1]].piece = copyPiece;
             }
         }
-        return copy;
-    }
-
-    revert(turns) {
-        const copy = this.restore(this.history[this.turn - turns]);
-        copy.history = this.history.slice(0, -turns);
-        copy.updateBoardMoves(copy.turn % 2);
-        return copy;
+        this.updateBoardMoves(this.turn % 2);
     }
 
     equal(arr) {

@@ -58,6 +58,28 @@ module.exports = (io) => {
             leaveRoom(room, socket);
         });
 
+        socket.on("creategame", (info, cb) => {
+            const { mode, player, timeLimit, depth } = info;
+
+            const queryStr = format(
+                `INSERT INTO games 
+            (mode, player, time_limit, depth)
+            VALUES %L RETURNING *;`,
+                [[mode, player, timeLimit, depth]]
+            );
+
+            db.query(queryStr).then((result) => {
+                cb(result.rows[0].game_id);
+                socket.broadcast.emit("newgame", result.rows[0]);
+            });
+        });
+
+        socket.on("games", (cb) => {
+            db.query(`SELECT * FROM games;`).then((result) => {
+                cb(result.rows);
+            });
+        });
+
         socket.on("makemove", (data) => {
             const room = sockets[socket.id];
             socket.broadcast.emit("move", data);
@@ -68,41 +90,22 @@ module.exports = (io) => {
             VALUES %L RETURNING *;`,
                     [[room, data.turn, ...data.move]]
                 )
-            ).catch((err) => {
-                res.status(400).send({ message: err.message });
-            });
+            );
         });
-    });
 
-    router.get("/", async (req, res) => {
-        return db
-            .query(`SELECT * FROM games;`)
-            .then((result) => {
-                res.status(200).json(result.rows);
-            })
-            .catch((err) => {
-                res.status(500).json({ message: err.message });
-            });
-    });
-
-    router.post("/", async (req, res) => {
-        const { mode, player, timeLimit, depth } = req.body;
-
-        const queryStr = format(
-            `INSERT INTO games 
-            (mode, player, time_limit, depth)
-            VALUES %L RETURNING *;`,
-            [[mode, player, timeLimit, depth]]
-        );
-        return db
-            .query(queryStr)
-            .then((result) => {
-                res.status(201).json(result.rows[0].game_id);
-                io.emit("newgame", result.rows[0]);
-            })
-            .catch((err) => {
-                res.status(400).send({ message: err.message });
-            });
+        socket.on("makeTakeback", (data) => {
+            const room = sockets[socket.id];
+            socket.broadcast.emit("takeback", data);
+            db.query(
+                `DELETE FROM moves
+                WHERE ctid IN (
+                    SELECT ctid FROM moves
+                    WHERE game_id = $1
+                    LIMIT 1 OFFSET (SELECT COUNT(*) FROM moves WHERE game_id = $1) - 1
+                    );`,
+                [room]
+            );
+        });
     });
 
     return router;

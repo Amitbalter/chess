@@ -29,6 +29,9 @@ const seed = () => {
         j2 INT NOT NULL,
         promoted VARCHAR
       );`);
+        })
+        .then(() => {
+            return db.query(`CREATE INDEX idx_game_id ON moves(game_id)`);
         });
 };
 

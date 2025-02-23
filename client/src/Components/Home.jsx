@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useContext } from "react";
-import api from "../api";
 import { useNavigate } from "react-router-dom";
 import Topbar from "./Topbar";
 import classes from "./Home.module.css";
@@ -38,11 +37,9 @@ export default function Home() {
                 setGames((games) => [...games, newgame]);
             });
 
-            api.get("/games")
-                .then((data) => {
-                    setGames(data.data);
-                })
-                .catch((err) => console.log(err));
+            socket.emit("games", (games) => {
+                setGames(games);
+            });
         }
         setStart(false);
     }, [create]);
@@ -59,14 +56,18 @@ export default function Home() {
         if (start) {
             if (id) navigate(`game/${id}`);
             else {
-                const response = await api.post("/games", {
-                    mode: mode,
-                    player: player,
-                    timeLimit: timeLimit,
-                    depth: depth,
-                });
-                console.log(response);
-                navigate(`game/${response.data}`);
+                socket.emit(
+                    "creategame",
+                    {
+                        mode: mode,
+                        player: player,
+                        timeLimit: timeLimit,
+                        depth: depth,
+                    },
+                    (id) => {
+                        navigate(`game/${id}`);
+                    }
+                );
             }
         }
     }
