@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import classes from "./Clock.module.css";
 
-export default function Clock({ turn, flip, timeLimit, start, restart }) {
+export default function Clock({ clock, flip, timeLimit, start, restart }) {
     const [time1, setTime1] = useState(60 * timeLimit);
     const [time2, setTime2] = useState(60 * timeLimit);
 
@@ -13,7 +13,7 @@ export default function Clock({ turn, flip, timeLimit, start, restart }) {
                     return (
                         <Timer
                             key={index}
-                            turn={turn}
+                            clock={clock}
                             player={[0, 1][orientation]}
                             time={[time1, time2][orientation]}
                             setTime={[setTime1, setTime2][orientation]}
@@ -30,7 +30,7 @@ export default function Clock({ turn, flip, timeLimit, start, restart }) {
     );
 }
 
-function Timer({ turn, player, time, setTime, timeLimit, start, restart }) {
+function Timer({ clock, player, time, setTime, timeLimit, start, restart }) {
     function displayTime(t) {
         const minutes = Math.floor(t / 60);
         const seconds = t % 60;
@@ -43,7 +43,7 @@ function Timer({ turn, player, time, setTime, timeLimit, start, restart }) {
 
     useEffect(() => {
         if (start) {
-            if (turn % 2 === player) {
+            if (clock === player) {
                 const intervalID = setInterval(() => {
                     setTime((time) => {
                         if (time > 0) {
@@ -60,7 +60,7 @@ function Timer({ turn, player, time, setTime, timeLimit, start, restart }) {
                 };
             }
         }
-    }, [turn, start]);
+    }, [clock, start]);
 
     return (
         <div>

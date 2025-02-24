@@ -87,7 +87,8 @@ module.exports = (io) => {
 
         socket.on("makemove", (data) => {
             const room = sockets[socket.id];
-            socket.broadcast.emit("move", data);
+            socket.to(room).emit("move", data);
+            io.in(room).emit("clock");
             db.query(
                 format(
                     `INSERT INTO moves 

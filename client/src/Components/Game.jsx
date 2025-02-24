@@ -14,6 +14,7 @@ export default function Game() {
     const [timeLimit, setTimeLimit] = useState(null);
     const [restart, setRestart] = useState(0);
     const [start, setStart] = useState(false);
+    const [clock, setClock] = useState(0);
 
     const socket = useContext(SocketContext);
     const { id } = useParams();
@@ -88,9 +89,16 @@ export default function Game() {
             setStart(true);
         });
 
+        socket.on("clock", () => {
+            setClock((clock) => 1 - clock);
+        });
+
         return () => {
             socket.emit("leave-room", id);
             socket.off("move");
+            socket.off("takeback");
+            socket.off("start");
+            socket.off("clock");
         };
     }, []);
 
@@ -144,7 +152,6 @@ export default function Game() {
     }
 
     function setInput(index) {
-        // console.log(mode, player);
         if ((mode === "online" && player === realTurn % 2) || (mode !== "online" && player === 0)) {
             const [i, j] = [index[0], index[1]];
             const row = [i, 7 - i][flip];
@@ -268,7 +275,7 @@ export default function Game() {
             <Topbar />
             <div className={classes.game}>
                 <div className={classes.left}>
-                    <Clock turn={realTurn} flip={flip} timeLimit={timeLimit} start={start} restart={restart} />
+                    <Clock clock={clock} flip={flip} timeLimit={timeLimit} start={start} restart={restart} />
                 </div>
                 <div className={classes.board}>
                     {board ? (
