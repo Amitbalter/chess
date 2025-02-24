@@ -5,10 +5,7 @@ const cors = require("cors");
 const { instrument } = require("@socket.io/admin-ui");
 const seed = require("./db/seeds/seed");
 
-if (process.env.NODE_ENV !== "production") {
-    console.log("reseeding");
-    seed();
-}
+seed();
 
 const app = express();
 const PORT = process.env.PORT || 1234;
