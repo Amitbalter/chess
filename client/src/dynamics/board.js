@@ -109,7 +109,7 @@ export default class Board {
         copy.enPassant = [...this.enPassant];
         copy.state = this.state;
         copy.lastMove = this.lastMove;
-        copy.movelog = this.movelog;
+        copy.movelog = [...this.movelog];
         for (let k of [0, 1]) {
             for (let piece of this.pieces[k]) {
                 const pieces = {

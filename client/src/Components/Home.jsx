@@ -45,7 +45,7 @@ export default function Home() {
     }, [create]);
 
     useEffect(() => {
-        if (player !== null && timeLimit !== null && ((mode === "computer" && depth !== null) || mode === "online" || mode === "offline")) {
+        if (player !== null && ((mode === "computer" && depth !== null) || (mode && timeLimit !== null))) {
             setStart(true);
         } else {
             setStart(false);
@@ -61,7 +61,7 @@ export default function Home() {
                     {
                         mode: mode,
                         player: player,
-                        timeLimit: timeLimit,
+                        timeLimit: timeLimit || 0,
                         depth: depth,
                     },
                     (id) => {
@@ -118,25 +118,12 @@ export default function Home() {
                         <button
                             onClick={() => {
                                 setMode("computer");
+                                setTimeLimit(null);
                             }}
                             className={classes.option}
                             style={changeOptionColor(mode, "computer")}
                         >
                             Computer
-                        </button>
-                    </div>
-                    <div className={classes.options}>
-                        <button onClick={() => setTimeLimit(0)} className={classes.option} style={changeOptionColor(timeLimit, 0)}>
-                            No limit
-                        </button>
-                        <button onClick={() => setTimeLimit(1)} className={classes.option} style={changeOptionColor(timeLimit, 1)}>
-                            1 minute
-                        </button>
-                        <button onClick={() => setTimeLimit(5)} className={classes.option} style={changeOptionColor(timeLimit, 5)}>
-                            5 minutes
-                        </button>
-                        <button onClick={() => setTimeLimit(10)} className={classes.option} style={changeOptionColor(timeLimit, 10)}>
-                            10 minutes
                         </button>
                     </div>
                     {mode === "computer" ? (
@@ -152,7 +139,20 @@ export default function Home() {
                             </button>
                         </div>
                     ) : (
-                        <></>
+                        <div className={classes.options}>
+                            <button onClick={() => setTimeLimit(0)} className={classes.option} style={changeOptionColor(timeLimit, 0)}>
+                                No limit
+                            </button>
+                            <button onClick={() => setTimeLimit(1)} className={classes.option} style={changeOptionColor(timeLimit, 1)}>
+                                1 minute
+                            </button>
+                            <button onClick={() => setTimeLimit(5)} className={classes.option} style={changeOptionColor(timeLimit, 5)}>
+                                5 minutes
+                            </button>
+                            <button onClick={() => setTimeLimit(10)} className={classes.option} style={changeOptionColor(timeLimit, 10)}>
+                                10 minutes
+                            </button>
+                        </div>
                     )}
                 </div>
             ) : (

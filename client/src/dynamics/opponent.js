@@ -17,11 +17,10 @@ function bestPosition(board, depth) {
 
     for (let move of possibleMoves) {
         const copy = board.replicate();
-        copy.promotedPiece = move[4];
-        copy.makeMove(...move.slice(0, 4));
+        copy.makeMove(...move);
         if (copy.state === "checkmate") {
             values.push([1000, -1000][player]);
-        } else if (copy.state === "stalemate" || "threefold") {
+        } else if (copy.state === "stalemate" || copy.state === "threefold") {
             values.push(0);
         } else {
             if (depth === 0) {

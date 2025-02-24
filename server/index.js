@@ -6,6 +6,7 @@ const { instrument } = require("@socket.io/admin-ui");
 const seed = require("./db/seeds/seed");
 
 if (process.env.NODE_ENV !== "production") {
+    console.log("reseeding");
     seed();
 }
 

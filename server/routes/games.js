@@ -45,8 +45,8 @@ module.exports = (io) => {
             Promise.all([gamesQuery, movesQuery]).then(([gamesRes, movesRes]) => {
                 const { mode, time_limit, player, depth } = gamesRes.rows[0];
                 const moves = movesRes.rows;
-                cb(mode, time_limit, position, player, moves);
-                if (position === 1) {
+                cb(mode, time_limit, depth, position, player, moves);
+                if ((mode === "online" && position === 1) || mode !== "online") {
                     io.in(room).emit("start");
                 }
             });
@@ -80,7 +80,10 @@ module.exports = (io) => {
         });
 
         socket.on("games", (cb) => {
-            db.query(`SELECT * FROM games;`).then((result) => {
+            db.query(
+                `SELECT * FROM games 
+                WHERE mode = 'online';`
+            ).then((result) => {
                 cb(result.rows);
             });
         });
@@ -94,14 +97,14 @@ module.exports = (io) => {
                     `INSERT INTO moves 
             (game_id, turn, i1, j1, i2, j2, promoted)
             VALUES %L RETURNING *;`,
-                    [[room, data.turn, ...data.move]]
+                    [[room, data.turn, ...data.move, data.promoted]]
                 )
             );
         });
 
         socket.on("makeTakeback", (data) => {
             const room = sockets[socket.id];
-            socket.broadcast.emit("takeback", data);
+            socket.to(room).emit("takeback", data);
             db.query(
                 `DELETE FROM moves
                 WHERE ctid IN (

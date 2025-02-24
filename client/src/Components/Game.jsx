@@ -1,5 +1,5 @@
-import React, { useEffect, useContext, useState, lazy } from "react";
-import { Link, useParams } from "react-router-dom";
+import React, { useEffect, useContext, useState } from "react";
+import { useParams } from "react-router-dom";
 import Topbar from "./Topbar";
 import Square from "./Square";
 import Clock from "./Clock";
@@ -8,10 +8,13 @@ import classes from "./Game.module.css";
 
 import { SocketContext } from "./SocketContext";
 import Board from "../dynamics/board";
+import bestMove from "../dynamics/opponent";
 
 export default function Game() {
     const [mode, setMode] = useState(null);
     const [timeLimit, setTimeLimit] = useState(null);
+    const [depth, setDepth] = useState(null);
+
     const [restart, setRestart] = useState(0);
     const [start, setStart] = useState(false);
     const [clock, setClock] = useState(0);
@@ -20,7 +23,6 @@ export default function Game() {
     const { id } = useParams();
 
     const [player, setPlayer] = useState(null);
-    const [computer, setComputer] = useState("false");
 
     const [boardColors, setBoardColors] = useState(Array(8).fill(Array(8).fill("")));
     const [boardDisabled, setBoardDisabled] = useState(false);
@@ -37,36 +39,25 @@ export default function Game() {
     const [move, setMove] = useState(null);
     const [takeback, setTakeback] = useState(null);
 
-    const [i1, seti1] = useState(null);
-    const [j1, setj1] = useState(null);
-    const [i2, seti2] = useState(null);
-    const [j2, setj2] = useState(null);
+    const [input, setInput] = useState(null);
     const [prev, setPrev] = useState(null);
     const [turn, setTurn] = useState(null);
     const [realTurn, setRealTurn] = useState(null);
     const [promoted, setPromoted] = useState(null);
 
-    function handleMove(data) {
-        setPrev(data.lastMove);
-        setTurn(data.turn);
-        setRealTurn(data.turn);
-        setMoves(data.movelog);
-        setBoard(data);
+    function updateBoard(game) {
+        setPrev(game.lastMove);
+        setTurn(game.turn);
+        setRealTurn(game.turn);
+        setMoves(game.movelog);
+        setBoard(game);
         setBoardDisabled(false);
-        resetInputs();
+        setInput(null);
         setMessage("");
     }
 
     useEffect(() => {
-        socket.emit("join-room", id, (mode, timeLimit, position, player, moves) => {
-            setMode(mode);
-            setTimeLimit(timeLimit);
-            if (mode === "online" && position !== null) {
-                setPlayer([player, 1 - player][position]);
-                setFlip([1 - player, player][position]);
-            } else if (mode !== "online" && position === 0) {
-                setPlayer(0);
-            }
+        socket.emit("join-room", id, (mode, timeLimit, depth, position, player, moves) => {
             const dummy = new Board();
             dummy.setupBoard();
             for (let move of moves) {
@@ -74,11 +65,26 @@ export default function Game() {
                 dummy.makeMove(i1, j1, i2, j2, promoted);
             }
             setGame(dummy);
-            handleMove(dummy);
+            updateBoard(dummy);
+
+            setMode(mode);
+            setTimeLimit(timeLimit);
+            setDepth(depth);
+
+            if (mode === "online" && position !== null) {
+                setPlayer([player, 1 - player][position]);
+                setFlip([1 - player, player][position]);
+            } else if (mode === "offline" && position === 0) {
+                setPlayer(0);
+            } else if (mode === "computer" && position === 0) {
+                setPlayer(player);
+                setFlip(1 - player);
+            }
         });
 
         socket.on("move", (data) => {
             setMove(data.move);
+            setPromoted(data.promoted);
         });
 
         socket.on("takeback", (data) => {
@@ -90,6 +96,7 @@ export default function Game() {
         });
 
         socket.on("clock", () => {
+            console.log("clock");
             setClock((clock) => 1 - clock);
         });
 
@@ -103,33 +110,39 @@ export default function Game() {
     }, []);
 
     useEffect(() => {
-        if (move) {
-            game.makeMove(...move);
-            handleMove(game);
+        if (move && promoted !== "required") {
+            if ((mode === "online" && player === realTurn % 2) || mode !== "online") {
+                socket.emit("makemove", { turn: realTurn, move: move, promoted: promoted });
+            }
+            game.makeMove(...move, promoted);
+            updateBoard(game);
+            setMove(null);
+            setPromoted(null);
         }
-    }, [move]);
+    }, [move, promoted]);
 
     useEffect(() => {
         if (takeback) {
             game.restore(realTurn - takeback);
-            handleMove(game);
+            updateBoard(game);
+            setTakeback(null);
         }
-        setTakeback(null);
     }, [takeback]);
 
-    function resetInputs() {
-        seti1(null);
-        seti2(null);
-        setj1(null);
-        setj2(null);
-    }
+    useEffect(() => {
+        if (mode === "computer" && player !== realTurn % 2) {
+            const move = bestMove(game, depth);
+            setMove(move.slice(0, 4));
+            setPromoted(move[4]);
+        }
+    }, [realTurn]);
 
     function handleTakeback() {
         if (turn === realTurn) {
             let turns;
-            if (computer === "false" && realTurn >= 1) {
+            if (mode !== "computer" && realTurn >= 1) {
                 turns = 1;
-            } else if (realTurn % 2 === Number(player) && realTurn >= 2) {
+            } else if (realTurn % 2 === player && realTurn >= 2) {
                 turns = 2;
             }
             if (turns) {
@@ -151,72 +164,55 @@ export default function Game() {
         setRestart((restart) => restart + 1);
     }
 
-    function setInput(index) {
-        if ((mode === "online" && player === realTurn % 2) || (mode !== "online" && player === 0)) {
+    function handleInput(index) {
+        if ((mode === "online" && player === realTurn % 2) || (mode === "offline" && player === 0) || (mode === "computer" && player === turn % 2)) {
             const [i, j] = [index[0], index[1]];
             const row = [i, 7 - i][flip];
             const col = [j, 7 - j][flip];
-            //setting input1 and input2
-            if (i1 === null) {
+            //setting input
+            if (input === null) {
                 // check correct color according to turn
                 if (board.array[row][col].piece.color === colors[realTurn % 2]) {
-                    seti1(row);
-                    setj1(col);
+                    setInput([row, col]);
                     setMessage("");
                 } else {
                     setMessage(`It is ${colors[realTurn % 2]}'s turn to play`);
                 }
             }
             //if second square is same piece of same colour then change input1 to new piece
-            else if (i1 !== null) {
-                const piece1 = board.array[i1][j1].piece;
+            else if (input !== null) {
+                const piece1 = board.array[input[0]][input[1]].piece;
                 if (piece1.moves.includes([row, col].join(""))) {
                     if (piece1.label === "P" && row === [7, 0][realTurn % 2]) {
                         setPromoted("required");
                         setBoardDisabled(true);
                     }
-                    seti2(row);
-                    setj2(col);
+                    setMove([...input, row, col]);
                 } else if (board.array[row][col].piece.color === colors[realTurn % 2]) {
-                    if (i1 !== row || j1 !== col) {
-                        seti1(row);
-                        setj1(col);
+                    if (i !== row || j !== col) {
+                        setInput([row, col]);
                     } else {
-                        seti1(null);
-                        seti1(null);
+                        setInput(null);
                     }
                 } else {
-                    seti1(null);
-                    seti1(null);
+                    setInput(null);
                 }
             }
         }
     }
 
-    //making the move and updating the board according to the outcome
-    useEffect(() => {
-        if (i2 !== null && j2 !== null && promoted != "required") {
-            setMove([i1, j1, i2, j2, promoted]);
-            socket.emit("makemove", { turn: realTurn, move: [i1, j1, i2, j2, promoted] });
-
-            // if (comp === null) setFlip(1-flip)
-        }
-        if (computer === "true") {
-            setBoardDisabled(realTurn % 2 !== Number(player));
-        }
-    }, [i2, j2, promoted]);
-
     //changing colors on board
     useEffect(() => {
         const dummyColors = Array.from({ length: 8 }, () => Array(8).fill(""));
+        const [i, j] = input || [null, null];
         if (prev !== null) {
             dummyColors[prev[0]][prev[1]] = "rgb(72, 111, 197)";
             dummyColors[prev[2]][prev[3]] = "rgba(68, 114, 212, 0.8)";
         }
-        if ((computer === "true" && realTurn % 2 === Number(player)) || computer === "false") {
-            if (i1 !== null && j1 !== null) {
-                let piece1 = board.array[i1][j1].piece;
-                dummyColors[i1][j1] = "rgb(5, 136, 0)";
+        if ((mode === "computer" && player === realTurn % 2) || mode !== "computer") {
+            if (input !== null) {
+                let piece1 = board.array[i][j].piece;
+                dummyColors[i][j] = "rgb(5, 136, 0)";
                 for (let move of piece1.moves) {
                     const [k, l] = [Number(move[0]), Number(move[1])];
                     dummyColors[k][l] = "rgba(8, 141, 3, 0.75)";
@@ -232,7 +228,7 @@ export default function Game() {
                 switch (board.state) {
                     case "check":
                         setMessage(`The ${king1.color} king is in check`);
-                        if (k !== i1 || l !== j1) {
+                        if (k !== i || l !== j) {
                             dummyColors[k][l] = "rgb(218, 137, 33)";
                         }
                         break;
@@ -257,7 +253,7 @@ export default function Game() {
             }
         }
         setBoardColors(dummyColors);
-    }, [prev, i1, j1, flip]);
+    }, [prev, input, flip]);
 
     useEffect(() => {
         if (turn === realTurn) {
@@ -267,7 +263,7 @@ export default function Game() {
             setBoardDisabled(true);
             setRedoColor("rgba(8, 141, 3, 0.75)");
         }
-        resetInputs();
+        setInput(null);
     }, [turn]);
 
     return (
@@ -284,7 +280,7 @@ export default function Game() {
                                 <Square
                                     key={[row, col]}
                                     index={[row, col]}
-                                    setInput={setInput}
+                                    setInput={handleInput}
                                     color={boardColors[[row, 7 - row][flip]][[col, 7 - col][flip]]}
                                     piece={board.array[[row, 7 - row][flip]][[col, 7 - col][flip]].piece.label}
                                     pieceColor={board.array[[row, 7 - row][flip]][[col, 7 - col][flip]].piece.color}
@@ -362,20 +358,3 @@ export default function Game() {
         </>
     );
 }
-
-// function generateMove() {
-//     const move = bestMove(gameBoard, Number(depth));
-//     if (move) {
-//         seti1(move[0]);
-//         setj1(move[1]);
-//         seti2(move[2]);
-//         setj2(move[3]);
-//         gameBoard.promoted = move[4];
-//     }
-// }
-
-// useEffect(() => {
-//     if (computer === "true" && realTurn % 2 !== Number(player)) {
-//         generateMove();player
-//     }
-// }, [next]);
