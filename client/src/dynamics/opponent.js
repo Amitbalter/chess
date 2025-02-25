@@ -3,7 +3,8 @@ function bestPosition(board, depth) {
     let values = [];
     const player = board.turn % 2;
 
-    for (let piece of board.pieces[player]) {
+    for (let pos in board.pieces[["white", "black"][player]]) {
+        const piece = board.pieces[["white", "black"][player]][pos];
         for (let move of piece.moves) {
             const [i1, j1] = piece.position;
             const [i2, j2] = [Number(move[0]), Number(move[1])];
@@ -46,8 +47,8 @@ function valuation(board) {
     const values = { P: 1, N: 3, B: 3, R: 5, Q: 9, K: 0 };
     let valuation = 0;
     for (let k of [0, 1]) {
-        for (let piece of board.pieces[k]) {
-            valuation += (1 - 2 * k) * values[piece.label];
+        for (let pos in board.pieces[["white", "black"][k]]) {
+            valuation += (1 - 2 * k) * values[board.pieces[["white", "black"][k]][pos].label];
         }
     }
     return valuation;
