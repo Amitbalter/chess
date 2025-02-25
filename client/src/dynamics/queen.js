@@ -9,11 +9,12 @@ export default class Queen extends Piece {
     updateMoves(board) {
         const [i, j] = this.position;
         this.moves = [];
+
         //diagonals
         for (let k1 of [-1, 1]) {
             for (let k2 of [-1, 1]) {
-                for (let s = 1; s <= Math.min((7 * (k1 + 1)) / 2 - k1 * i, (7 * (k2 + 1)) / 2 - k2 * j); s++) {
-                    const [row, col] = [i + k1 * s, j + k2 * s];
+                let [row, col] = [i + k1, j + k2];
+                while (row >= 0 && row <= 7 && col >= 0 && col <= 7) {
                     let piece = board.array[row][col].piece;
                     if (piece.label === "") {
                         this.legalmove(row, col, board);
@@ -23,14 +24,17 @@ export default class Queen extends Piece {
                             break;
                         } else break;
                     }
+                    row += k1;
+                    col += k2;
                 }
             }
         }
+
         //rows and columns
         for (let k1 of [0, 1]) {
             for (let k2 of [-1, 1]) {
-                for (let s = 1; s + k2 * [i, j][k1] <= (7 * (1 + k2)) / 2; s++) {
-                    const [row, col] = [i + (1 - k1) * k2 * s, j + k1 * k2 * s];
+                let [row, col] = [i + k1 * k2, j + (1 - k1) * k2];
+                while (row >= 0 && row <= 7 && col >= 0 && col <= 7) {
                     let piece = board.array[row][col].piece;
                     if (piece.label === "") {
                         this.legalmove(row, col, board);
@@ -40,6 +44,8 @@ export default class Queen extends Piece {
                             break;
                         } else break;
                     }
+                    row += k1 * k2;
+                    col += (1 - k1) * k2;
                 }
             }
         }

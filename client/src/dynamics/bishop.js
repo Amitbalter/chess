@@ -11,8 +11,8 @@ export default class Bishop extends Piece {
         this.moves = [];
         for (let k1 of [-1, 1]) {
             for (let k2 of [-1, 1]) {
-                for (let s = 1; s <= Math.min((7 * (k1 + 1)) / 2 - k1 * i, (7 * (k2 + 1)) / 2 - k2 * j); s++) {
-                    const [row, col] = [i + k1 * s, j + k2 * s];
+                let [row, col] = [i + k1, j + k2];
+                while (row >= 0 && row <= 7 && col >= 0 && col <= 7) {
                     let piece = board.array[row][col].piece;
                     if (piece.label === "") {
                         this.legalmove(row, col, board);
@@ -22,6 +22,8 @@ export default class Bishop extends Piece {
                             break;
                         } else break;
                     }
+                    row += k1;
+                    col += k2;
                 }
             }
         }

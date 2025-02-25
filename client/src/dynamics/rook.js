@@ -12,8 +12,8 @@ export default class Rook extends Piece {
         this.moves = [];
         for (let k1 of [0, 1]) {
             for (let k2 of [-1, 1]) {
-                for (let s = 1; s + k2 * [i, j][k1] <= (7 * (1 + k2)) / 2; s++) {
-                    const [row, col] = [i + (1 - k1) * k2 * s, j + k1 * k2 * s];
+                let [row, col] = [i + k1 * k2, j + (1 - k1) * k2];
+                while (row >= 0 && row <= 7 && col >= 0 && col <= 7) {
                     let piece = board.array[row][col].piece;
                     if (piece.label === "") {
                         this.legalmove(row, col, board);
@@ -23,23 +23,30 @@ export default class Rook extends Piece {
                             break;
                         } else break;
                     }
+                    row += k1 * k2;
+                    col += (1 - k1) * k2;
                 }
             }
         }
+
         if (this.castle === "Y") {
-            const row = 7 * ["white", "black"].indexOf(this.color);
+            const row = this.color === "white" ? 0 : 7;
             let king = board.array[row][3].piece;
             if (king.castle === "Y") {
-                const n = (2 * j) / 7 - 1; // n is +1 or -1 depending on Rook
-                if (i === row && Math.abs(n) === 1) {
+                if (i === row && (j === 0 || j === 7)) {
+                    const n = [-1, 1][j / 7]; // n is +1 or -1 depending on Rook
                     let empty = true;
-                    for (let s = 1; n * (3 + n * s) <= j - 1; s++) {
-                        if (board.array[row][3 + n * s].piece.label !== "") {
+
+                    let col = 3 + n;
+                    while (col < 7 && col > 0) {
+                        if (board.array[row][col].piece.label !== "") {
                             empty = false;
                         }
+                        col += n;
                     }
+
                     if (empty) {
-                        const k = ["white", "black"].indexOf(this.color);
+                        const k = row / 7;
                         if (k === board.turn % 2) {
                             board.updateBoardMoves(1 - k);
                             let check = false;
@@ -67,23 +74,16 @@ export default class Rook extends Piece {
     }
 
     move(i1, j1, i2, j2, board) {
-        const square1 = board.array[i1][j1];
-        const square2 = board.array[i2][j2];
-        const piece = square2.piece;
-        const player = -2 * ["white", "black"].indexOf(this.color) + 1;
+        const piece = board.array[i2][j2].piece;
         if (this.color !== piece.color) {
-            this.castle = "N";
-            board.doMove(square1, square2);
-            return true;
+            board.doMove(i1, j1, i2, j2);
         } else {
-            const index = ["K", "R"].indexOf(piece.label);
-            const row = 7 * ["white", "black"].indexOf(this.color);
-            const side = (2 * [j1, j2][index]) / 7 - 1;
-            board.doMove([square1, square2][index], board.array[row][3 + side]);
-            board.doMove([square1, square2][(index + 1) % 2], board.array[row][3 + 2 * side]);
-            this.castle = "N";
+            const row = this.color === "white" ? 0 : 7;
+            const dir = [-1, 1][j1 / 7];
+            board.doMove(i1, j1, row, 3 + dir);
+            board.doMove(i2, j2, row, 3 + 2 * dir);
             piece.castle = "N";
-            return true;
         }
+        this.castle = "N";
     }
 }

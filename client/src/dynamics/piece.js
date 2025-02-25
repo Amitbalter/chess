@@ -9,14 +9,9 @@ export default class Piece {
     }
 
     move(i1, j1, i2, j2, board) {
-        const square1 = board.array[i1][j1];
-        const square2 = board.array[i2][j2];
-        const piece = square2.piece;
-        const player = this.color === "white" ? 1 : -1;
-        if (this.color !== piece.color) {
+        if (this.color !== board.array[i2][j2].piece.color) {
             this.castle = "N";
-            board.doMove(square1, square2);
-            return true;
+            board.doMove(i1, j1, i2, j2);
         }
     }
 
@@ -30,7 +25,7 @@ export default class Piece {
             //enpassant
             copy.setPiece(4 - n, col, new Empty());
         }
-        copy.doMove(square1, square2);
+        copy.doMove(i, j, row, col);
         copy.updateBoardMoves(1 - n); //update moves of opposite color
         //check if king of same color in check
         if (!copy.kingInCheck(n)) {

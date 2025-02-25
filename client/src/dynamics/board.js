@@ -28,7 +28,7 @@ export default class Board {
         this.state = null;
         this.history = [];
         this.lastMove = null;
-        this.promotedPiece = null;
+        this.promoted = null;
         this.movelog = [];
     }
 
@@ -71,18 +71,18 @@ export default class Board {
         }
     }
 
-    doMove(square1, square2) {
-        const piece1 = square1.piece;
-        const piece2 = square2.piece;
+    doMove(i1, j1, i2, j2) {
+        const piece1 = this.array[i1][j1].piece;
+        const piece2 = this.array[i2][j2].piece;
         //removing captured piece from the board
         if (piece2.label !== "") {
-            const color = ["white", "black"].indexOf(piece2.color);
+            const color = piece2.color === "white" ? 0 : 1;
             const index = this.pieces[color].indexOf(piece2);
             this.pieces[color].splice(index, 1); //remove piece on square2 from board pieces
         }
-        square2.piece = piece1; //move piece from square1 to square2
-        piece1.position = square2.position; //update position of piece
-        square1.piece = new Empty(); //square1 is now empty
+        this.array[i2][j2].piece = piece1; //move piece from square1 to square2
+        piece1.position = [i2, j2]; //update position of piece
+        this.array[i1][j1].piece = new Empty(); //square1 is now empty
     }
 
     //function that updates all the possible moves on the board
@@ -181,50 +181,50 @@ export default class Board {
         return true;
     }
 
-    makeMove(i1, j1, i2, j2, promotedPiece) {
-        this.promotedPiece = promotedPiece;
+    makeMove(i1, j1, i2, j2, promoted) {
+        this.promoted = promoted;
         const piece1 = this.array[i1][j1].piece;
-        if (piece1.move(i1, j1, i2, j2, this)) {
-            this.turn++;
-            this.enPassant[this.turn % 2] = null;
-            this.state = null;
-            this.lastMove = [i1, j1, i2, j2];
-            this.movelog.push([i2, j2, piece1.label]);
-            this.promotedPiece = null;
+        piece1.move(i1, j1, i2, j2, this);
+
+        this.turn++;
+        this.enPassant[this.turn % 2] = null;
+        this.state = null;
+        this.lastMove = [i1, j1, i2, j2];
+        this.movelog.push([i2, j2, piece1.label]);
+        this.promoted = null;
+        this.moves = [[], []];
+
+        this.updateBoardMoves((this.turn + 1) % 2);
+        if (this.kingInCheck(this.turn % 2)) {
             this.moves = [[], []];
-
-            this.updateBoardMoves((this.turn + 1) % 2);
-            if (this.kingInCheck(this.turn % 2)) {
-                this.moves = [[], []];
-                this.updateBoardMoves(this.turn % 2);
-                if (this.moves[this.turn % 2].length !== 0) {
-                    this.state = "check";
-                } else {
-                    this.state = "checkmate";
-                }
+            this.updateBoardMoves(this.turn % 2);
+            if (this.moves[this.turn % 2].length !== 0) {
+                this.state = "check";
             } else {
-                this.moves = [[], []];
-                this.updateBoardMoves(this.turn % 2);
-                if (this.moves[this.turn % 2].length === 0) {
-                    this.state = "stalemate";
-                }
+                this.state = "checkmate";
             }
-            //threefold repetition
-            let repetition = 0;
-            for (let arr of this.history) {
-                if ((arr.turn - this.turn) % 2 === 0) {
-                    if (this.equal(arr)) {
-                        repetition++;
-                    }
-                }
+        } else {
+            this.moves = [[], []];
+            this.updateBoardMoves(this.turn % 2);
+            if (this.moves[this.turn % 2].length === 0) {
+                this.state = "stalemate";
             }
-            if (repetition === 2) {
-                this.state = "threefold";
-            }
-
-            const arrangement = JSON.parse(JSON.stringify(this));
-            arrangement.history = [];
-            this.history.push(arrangement);
         }
+        //threefold repetition
+        let repetition = 0;
+        for (let arr of this.history) {
+            if ((arr.turn - this.turn) % 2 === 0) {
+                if (this.equal(arr)) {
+                    repetition++;
+                }
+            }
+        }
+        if (repetition === 2) {
+            this.state = "threefold";
+        }
+
+        const arrangement = JSON.parse(JSON.stringify(this));
+        arrangement.history = [];
+        this.history.push(arrangement);
     }
 }

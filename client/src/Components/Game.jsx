@@ -316,7 +316,7 @@ export default function Game() {
                             Redo
                         </button>
                         <button className={classes.option} onClick={() => setFlip(1 - flip)}>
-                            Flip Board
+                            Flip
                         </button>
                         <button className={classes.option} onClick={() => handleRestart()}>
                             Restart

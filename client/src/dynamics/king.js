@@ -22,18 +22,21 @@ export default class King extends Piece {
             }
         }
         if (this.castle === "Y") {
-            const row = 7 * ["white", "black"].indexOf(this.color);
+            const row = this.color === "white" ? 0 : 7;
             for (let n of [-1, 1]) {
                 let rook = board.array[row][(7 * (n + 1)) / 2].piece;
                 if (rook.castle === "Y") {
                     let empty = true;
-                    for (let s = 1; n * (3 + n * s) <= (7 * (n + 1)) / 2 - 1; s++) {
-                        if (board.array[row][3 + n * s].piece.label !== "") {
+                    let col = 3 + n;
+                    while (col < 7 && col > 0) {
+                        if (board.array[row][col].piece.label !== "") {
                             empty = false;
                         }
+                        col += n;
                     }
+
                     if (empty) {
-                        const k = ["white", "black"].indexOf(this.color);
+                        const k = row / 7;
                         if (k === board.turn % 2) {
                             board.updateBoardMoves(1 - k);
                             let check = false;
@@ -60,23 +63,16 @@ export default class King extends Piece {
     }
 
     move(i1, j1, i2, j2, board) {
-        const square1 = board.array[i1][j1];
-        const square2 = board.array[i2][j2];
-        const piece = square2.piece;
-        const player = -2 * ["white", "black"].indexOf(this.color) + 1;
+        const piece = board.array[i2][j2].piece;
         if (this.color !== piece.color) {
-            this.castle = "N";
-            board.doMove(square1, square2);
-            return true;
+            board.doMove(i1, j1, i2, j2);
         } else {
-            const index = ["K", "R"].indexOf(piece.label);
-            const row = 7 * ["white", "black"].indexOf(this.color);
-            const side = (2 * [j1, j2][index]) / 7 - 1;
-            board.doMove([square1, square2][index], board.array[row][3 + side]);
-            board.doMove([square1, square2][(index + 1) % 2], board.array[row][3 + 2 * side]);
-            this.castle = "N";
+            const row = this.color === "white" ? 0 : 7;
+            const dir = [-1, 1][j2 / 7];
+            board.doMove(i1, j1, row, 3 + dir);
+            board.doMove(i2, j2, row, 3 + 2 * dir);
             piece.castle = "N";
-            return true;
         }
+        this.castle = "N";
     }
 }
