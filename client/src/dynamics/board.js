@@ -22,7 +22,7 @@ export default class Board {
             })
         );
         this.enPassant = [null, null];
-        this.pieces = [[], []];
+        this.pieces = { white: {}, black: {} };
         this.moves = [[], []];
         this.turn = 0;
         this.state = null;
@@ -30,6 +30,7 @@ export default class Board {
         this.lastMove = null;
         this.promoted = null;
         this.movelog = [];
+        this.king = [null, null];
     }
 
     setupBoard() {
@@ -57,38 +58,31 @@ export default class Board {
         this.history.push(JSON.parse(JSON.stringify(this)));
     }
 
-    setPiece(i, j, piece) {
-        const square = this.array[i][j];
-        if (square.piece.label !== "") {
-            const color = ["white", "black"].indexOf(square.piece.color);
-            const index = this.pieces[color].indexOf(square.piece);
-            this.pieces[color].splice(index, 1);
+    setPiece(i, j, piece1) {
+        const piece2 = this.array[i][j].piece;
+        if (piece2.label !== "") {
+            delete this.pieces[piece2.color][`${i}${j}`];
         }
-        square.piece = piece; //place piece on square
-        piece.position = [i, j]; //update position of piece
-        if (piece.label !== "") {
-            this.pieces[["white", "black"].indexOf(piece.color)].push(piece); //add piece to board pieces
+        this.array[i][j].piece = piece1; //place piece on square
+        piece1.position = [i, j]; //update position of piece
+        if (piece1.label !== "") {
+            this.pieces[piece1.color][`${i}${j}`] = piece1; //add piece to board pieces
+            if (piece1.label === "K") {
+                this.king[piece1.color === "white" ? 0 : 1] = `${i}${j}`;
+            }
         }
     }
 
     doMove(i1, j1, i2, j2) {
-        const piece1 = this.array[i1][j1].piece;
-        const piece2 = this.array[i2][j2].piece;
-        //removing captured piece from the board
-        if (piece2.label !== "") {
-            const color = piece2.color === "white" ? 0 : 1;
-            const index = this.pieces[color].indexOf(piece2);
-            this.pieces[color].splice(index, 1); //remove piece on square2 from board pieces
-        }
-        this.array[i2][j2].piece = piece1; //move piece from square1 to square2
-        piece1.position = [i2, j2]; //update position of piece
-        this.array[i1][j1].piece = new Empty(); //square1 is now empty
+        this.setPiece(i2, j2, this.array[i1][j1].piece);
+        this.setPiece(i1, j1, new Empty());
     }
 
     //function that updates all the possible moves on the board
     updateBoardMoves(k) {
         this.moves[k] = [];
-        for (let piece of this.pieces[k]) {
+        for (let pos in this.pieces[["white", "black"][k]]) {
+            const piece = this.pieces[["white", "black"][k]][pos];
             piece.updateMoves(this);
             this.moves[k] = this.moves[k].concat(piece.moves);
         }
@@ -96,8 +90,7 @@ export default class Board {
     }
 
     kingInCheck(color) {
-        let kingPos = this.pieces[color % 2].find((piece) => piece.label === "K").position.join("");
-        if (this.moves[(color + 1) % 2].includes(kingPos)) {
+        if (this.moves[(color + 1) % 2].includes(this.king[color % 2])) {
             return true;
         }
         return false;
@@ -110,8 +103,10 @@ export default class Board {
         copy.state = this.state;
         copy.lastMove = this.lastMove;
         copy.movelog = [...this.movelog];
+        copy.king = [...this.king];
         for (let k of [0, 1]) {
-            for (let piece of this.pieces[k]) {
+            for (let pos in this.pieces[["white", "black"][k]]) {
+                const piece = this.pieces[["white", "black"][k]][pos];
                 const pieces = {
                     P: new Pawn(piece.color),
                     N: new Knight(piece.color),
@@ -123,7 +118,7 @@ export default class Board {
                 const copyPiece = pieces[piece.label];
                 copyPiece.castle = piece.castle;
                 copyPiece.position = [...piece.position];
-                copy.pieces[k].push(copyPiece);
+                copy.pieces[["white", "black"][k]][piece.position.join("")] = copyPiece;
                 copy.array[copyPiece.position[0]][copyPiece.position[1]].piece = copyPiece;
             }
         }
@@ -143,10 +138,12 @@ export default class Board {
         this.lastMove = arrangement.lastMove;
         this.movelog = [...arrangement.movelog];
         this.history = this.history.slice(0, this.turn + 1);
-        this.pieces = [[], []];
+        this.pieces = { white: {}, black: {} };
         this.moves = [[], []];
+        this.king = [...arrangement.king];
         for (let k of [0, 1]) {
-            for (let piece of arrangement.pieces[k]) {
+            for (let pos in arrangement.pieces[["white", "black"][k]]) {
+                const piece = arrangement.pieces[["white", "black"][k]][pos];
                 const pieces = {
                     P: new Pawn(piece.color),
                     N: new Knight(piece.color),
@@ -158,7 +155,7 @@ export default class Board {
                 const copyPiece = pieces[piece.label];
                 copyPiece.castle = piece.castle;
                 copyPiece.position = [...piece.position];
-                this.pieces[k].push(copyPiece);
+                this.pieces[["white", "black"][k]][piece.position.join("")] = copyPiece;
                 this.array[copyPiece.position[0]][copyPiece.position[1]].piece = copyPiece;
             }
         }

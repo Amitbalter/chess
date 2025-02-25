@@ -96,7 +96,6 @@ export default function Game() {
         });
 
         socket.on("clock", () => {
-            console.log("clock");
             setClock((clock) => 1 - clock);
         });
 
@@ -189,7 +188,7 @@ export default function Game() {
                     }
                     setMove([...input, row, col]);
                 } else if (board.array[row][col].piece.color === colors[realTurn % 2]) {
-                    if (i !== row || j !== col) {
+                    if (input[0] !== row || input[1] !== col) {
                         setInput([row, col]);
                     } else {
                         setInput(null);
@@ -220,11 +219,11 @@ export default function Game() {
             }
         }
         if (turn !== null) {
-            let king1 = board.pieces[turn % 2].find((piece) => piece.label === "K");
-            let king2 = board.pieces[(turn + 1) % 2].find((piece) => piece.label === "K");
+            let king1 = board.king[turn % 2];
+            let king2 = board.king[(turn + 1) % 2];
             if (king1 && king2) {
-                let [k, l] = king1.position;
-                let [m, n] = king2.position;
+                let [k, l] = [Number(king1[0]), Number(king1[1])];
+                let [m, n] = [Number(king2[0]), Number(king2[1])];
                 switch (board.state) {
                     case "check":
                         setMessage(`The ${king1.color} king is in check`);
