@@ -48,6 +48,12 @@ module.exports = (io) => {
                 cb(mode, time_limit, depth, position, player, moves);
                 if ((mode === "online" && position === 1) || mode !== "online") {
                     io.in(room).emit("start");
+                    db.query(
+                        `UPDATE games
+                            SET state = 'active'
+                            WHERE game_id = $1;`,
+                        [room]
+                    );
                 }
             });
         });
@@ -68,9 +74,9 @@ module.exports = (io) => {
 
             const queryStr = format(
                 `INSERT INTO games 
-            (mode, player, time_limit, depth)
-            VALUES %L RETURNING *;`,
-                [[mode, player, timeLimit, depth]]
+                (state, mode, player, time_limit, depth)
+                VALUES %L RETURNING *;`,
+                [["waiting", mode, player, timeLimit, depth]]
             );
 
             db.query(queryStr).then((result) => {
@@ -82,7 +88,7 @@ module.exports = (io) => {
         socket.on("games", (cb) => {
             db.query(
                 `SELECT * FROM games 
-                WHERE mode = 'online';`
+                WHERE state = 'waiting' AND mode = 'online';`
             ).then((result) => {
                 cb(result.rows);
             });
@@ -95,8 +101,8 @@ module.exports = (io) => {
             db.query(
                 format(
                     `INSERT INTO moves 
-            (game_id, turn, i1, j1, i2, j2, promoted)
-            VALUES %L RETURNING *;`,
+                    (game_id, turn, i1, j1, i2, j2, promoted)
+                    VALUES %L RETURNING *;`,
                     [[room, data.turn, ...data.move, data.promoted]]
                 )
             );
@@ -113,6 +119,16 @@ module.exports = (io) => {
                     LIMIT $2 OFFSET (SELECT COUNT(*) FROM moves WHERE game_id = $1) - $2
                     );`,
                 [room, data.takeback]
+            );
+        });
+
+        socket.on("state", (data) => {
+            const room = sockets[socket.id];
+            db.query(
+                `UPDATE games
+                SET state = $1
+                WHERE game_id = $2;`,
+                [data.state, room]
             );
         });
     });

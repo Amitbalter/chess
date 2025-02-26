@@ -96,17 +96,15 @@ export default class Board {
         return false;
     }
 
-    replicate() {
-        const copy = new Board();
-        copy.turn = this.turn;
-        copy.enPassant = [...this.enPassant];
-        copy.state = this.state;
-        copy.lastMove = this.lastMove;
-        copy.movelog = [...this.movelog];
-        copy.king = [...this.king];
+    duplicate(source, target) {
+        target.turn = source.turn;
+        target.enPassant = [...source.enPassant];
+        target.state = source.state;
+        target.king = [...source.king];
+
         for (let k of [0, 1]) {
-            for (let pos in this.pieces[["white", "black"][k]]) {
-                const piece = this.pieces[["white", "black"][k]][pos];
+            for (let pos in source.pieces[["white", "black"][k]]) {
+                const piece = source.pieces[["white", "black"][k]][pos];
                 const pieces = {
                     P: new Pawn(piece.color),
                     N: new Knight(piece.color),
@@ -118,47 +116,33 @@ export default class Board {
                 const copyPiece = pieces[piece.label];
                 copyPiece.castle = piece.castle;
                 copyPiece.position = [...piece.position];
-                copy.pieces[["white", "black"][k]][piece.position.join("")] = copyPiece;
-                copy.array[copyPiece.position[0]][copyPiece.position[1]].piece = copyPiece;
+                target.pieces[["white", "black"][k]][piece.position.join("")] = copyPiece;
+                target.array[copyPiece.position[0]][copyPiece.position[1]].piece = copyPiece;
             }
         }
+    }
+
+    replicate() {
+        const copy = new Board();
+        this.duplicate(this, copy);
         return copy;
     }
 
     restore(turn) {
         const arrangement = this.history[turn];
+
+        this.pieces = { white: {}, black: {} };
+        this.moves = [[], []];
+        this.history = this.history.slice(0, this.turn + 1);
+        this.movelog = [...arrangement.movelog];
+        this.lastMove = arrangement.lastMove;
+
         this.array = Array.from({ length: 8 }).map((_, i) =>
             Array.from({ length: 8 }).map((_, j) => {
                 return new square(["white", "black"][(i + j) % 2], [i, j], new Empty());
             })
         );
-        this.turn = arrangement.turn;
-        this.enPassant = [...arrangement.enPassant];
-        this.state = arrangement.state;
-        this.lastMove = arrangement.lastMove;
-        this.movelog = [...arrangement.movelog];
-        this.history = this.history.slice(0, this.turn + 1);
-        this.pieces = { white: {}, black: {} };
-        this.moves = [[], []];
-        this.king = [...arrangement.king];
-        for (let k of [0, 1]) {
-            for (let pos in arrangement.pieces[["white", "black"][k]]) {
-                const piece = arrangement.pieces[["white", "black"][k]][pos];
-                const pieces = {
-                    P: new Pawn(piece.color),
-                    N: new Knight(piece.color),
-                    B: new Bishop(piece.color),
-                    R: new Rook(piece.color),
-                    Q: new Queen(piece.color),
-                    K: new King(piece.color),
-                };
-                const copyPiece = pieces[piece.label];
-                copyPiece.castle = piece.castle;
-                copyPiece.position = [...piece.position];
-                this.pieces[["white", "black"][k]][piece.position.join("")] = copyPiece;
-                this.array[copyPiece.position[0]][copyPiece.position[1]].piece = copyPiece;
-            }
-        }
+        this.duplicate(arrangement, this);
         this.updateBoardMoves(this.turn % 2);
     }
 

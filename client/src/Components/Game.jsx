@@ -7,13 +7,14 @@ import MoveLog from "./MoveLog";
 import classes from "./Game.module.css";
 
 import { SocketContext } from "./SocketContext";
-import Board from "../dynamics/board";
-import bestMove from "../dynamics/opponent";
+import Board from "../mechanics/board";
+import bestMove from "../mechanics/opponent";
 
 export default function Game() {
     const [mode, setMode] = useState(null);
     const [timeLimit, setTimeLimit] = useState(null);
     const [depth, setDepth] = useState(null);
+    const [state, setState] = useState(false);
 
     const [restart, setRestart] = useState(0);
     const [start, setStart] = useState(false);
@@ -117,6 +118,7 @@ export default function Game() {
             updateBoard(game);
             setMove(null);
             setPromoted(null);
+            setState(false);
         }
     }, [move, promoted]);
 
@@ -129,12 +131,20 @@ export default function Game() {
     }, [takeback]);
 
     useEffect(() => {
-        if (mode === "computer" && player !== realTurn % 2) {
+        if (mode === "computer" && player !== realTurn % 2 && state === null) {
             const move = bestMove(game, depth);
             setMove(move.slice(0, 4));
             setPromoted(move[4]);
         }
-    }, [realTurn]);
+    }, [state]);
+
+    useEffect(() => {
+        if (state) {
+            if (mode !== "online" || (mode === "online" && player == realTurn % 2)) {
+                socket.emit("state", { state: state });
+            }
+        }
+    }, [state]);
 
     function handleTakeback() {
         if (turn === realTurn) {
@@ -225,27 +235,34 @@ export default function Game() {
                 let [k, l] = [Number(king1[0]), Number(king1[1])];
                 let [m, n] = [Number(king2[0]), Number(king2[1])];
                 switch (board.state) {
+                    case null:
+                        setState(null);
+                        break;
                     case "check":
-                        setMessage(`The ${king1.color} king is in check`);
+                        setMessage(`The ${colors[(turn + 1) % 2]} king is in check`);
                         if (k !== i || l !== j) {
                             dummyColors[k][l] = "rgb(218, 137, 33)";
                         }
+                        setState(null);
                         break;
                     case "checkmate":
-                        setMessage(`Checkmate, ${king2.color} wins`);
                         dummyColors[k][l] = "purple";
+                        setMessage(`Checkmate, ${colors[(turn + 1) % 2]} wins`);
+                        setState(colors[(turn + 1) % 2]);
                         setBoardDisabled(true);
                         break;
                     case "stalemate":
-                        setMessage("Stalemate");
                         dummyColors[k][l] = "pink";
                         dummyColors[m][n] = "pink";
+                        setMessage("Stalemate");
+                        setState("draw");
                         setBoardDisabled(true);
                         break;
                     case "threefold":
-                        setMessage("Threefold repetition");
                         dummyColors[k][l] = "yellow";
                         dummyColors[m][n] = "yellow";
+                        setMessage("threefold repetition");
+                        setState("draw");
                         setBoardDisabled(true);
                         break;
                 }
