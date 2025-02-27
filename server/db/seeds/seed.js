@@ -11,7 +11,7 @@ const seed = () => {
             return db.query(`
       CREATE TABLE games (
         game_id SERIAL PRIMARY KEY,
-        state VARCHAR NOT NULL,
+        state VARCHAR,
         mode VARCHAR NOT NULL,
         player INT NOT NULL,
         time_limit INT,

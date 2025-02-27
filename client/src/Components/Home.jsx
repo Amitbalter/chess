@@ -9,7 +9,7 @@ export default function Home() {
 
     const navigate = useNavigate();
 
-    const [create, setCreate] = useState(null);
+    const [option, setOption] = useState(null);
     const [start, setStart] = useState(false);
 
     const [player, setPlayer] = useState(null);
@@ -18,31 +18,55 @@ export default function Home() {
     const [depth, setDepth] = useState(null);
 
     const [id, setId] = useState(null);
-    const [games, setGames] = useState([]);
+    const [games, setGames] = useState({});
 
     function changeOptionColor(variable, value) {
         return { backgroundColor: variable === value ? "rgba(8, 141, 3, 0.75)" : "" };
     }
 
     useEffect(() => {
-        if (create === true) {
-            setId(null);
-        } else if (create === false) {
-            setPlayer(null);
-            setMode(null);
-            setTimeLimit(null);
-            setDepth(null);
+        socket.emit("games", (data) => {
+            setGames(() =>
+                data.reduce((acc, element) => {
+                    acc[element.game_id] = element;
+                    return acc;
+                }, {})
+            );
+        });
 
-            socket.on("newgame", (newgame) => {
-                setGames((games) => [...games, newgame]);
-            });
+        socket.on("gamenew", (newgame) => {
+            setGames((games) => ({
+                ...games,
+                [newgame.game_id]: newgame,
+            }));
+        });
 
-            socket.emit("games", (games) => {
-                setGames(games);
-            });
-        }
+        socket.on("gamestate", (data) => {
+            // console.log(data);
+            setGames((games) => ({
+                ...games,
+                [data.game_id]: { ...games[data.game_id], state: data.state },
+            }));
+        });
+
+        return () => {
+            socket.off("gamenew");
+            socket.off("gameactive");
+        };
+    }, []);
+
+    // useEffect(() => {
+    //     console.log(games);
+    // }, [games]);
+
+    useEffect(() => {
+        setId(null);
+        setPlayer(null);
+        setMode(null);
+        setTimeLimit(null);
+        setDepth(null);
         setStart(false);
-    }, [create]);
+    }, [option]);
 
     useEffect(() => {
         if (player !== null && ((mode === "computer" && depth !== null) || (mode && timeLimit !== null))) {
@@ -56,6 +80,7 @@ export default function Home() {
         if (start) {
             if (id) navigate(`game/${id}`);
             else {
+                console.log("start");
                 socket.emit(
                     "creategame",
                     {
@@ -76,15 +101,18 @@ export default function Home() {
         <div>
             <Topbar />
             <div className={classes.mainoptions}>
-                <button onClick={() => setCreate(true)} className={classes.mainoption} style={changeOptionColor(create, true)}>
+                <button onClick={() => setOption("new")} className={classes.mainoption} style={changeOptionColor(option, "new")}>
                     New Game
                 </button>
-                <button onClick={() => setCreate(false)} className={classes.mainoption} style={changeOptionColor(create, false)}>
+                <button onClick={() => setOption("join")} className={classes.mainoption} style={changeOptionColor(option, "join")}>
                     Join Game
+                </button>
+                <button onClick={() => setOption("spectate")} className={classes.mainoption} style={changeOptionColor(option, "spectate")}>
+                    Spectate
                 </button>
             </div>
 
-            {create === true ? (
+            {option === "new" ? (
                 <div className={classes.optionmenu}>
                     <div className={classes.options}>
                         <button onClick={() => setPlayer(0)} className={classes.option} style={changeOptionColor(player, 0)}>
@@ -155,21 +183,19 @@ export default function Home() {
                         </div>
                     )}
                 </div>
-            ) : (
-                <></>
-            )}
+            ) : null}
 
-            {create === false ? (
-                <>
-                    <div className={classes.gamelog}>
-                        <div className={classes.header}>
-                            <p align="center">player</p>
-                            <p align="center">Time Limit</p>
-                            <p align="center">Mode</p>
-                        </div>
-                        {games.map((game, index) => (
+            {option === "join" ? (
+                <div className={classes.gamelog}>
+                    <div className={classes.header}>
+                        <p align="center">player</p>
+                        <p align="center">Time Limit</p>
+                        <p align="center">Mode</p>
+                    </div>
+                    {Object.values(games).map((game) =>
+                        game.state === "waiting" ? (
                             <button
-                                key={index}
+                                key={game.game_id}
                                 className={classes.game}
                                 onClick={() => {
                                     setId(game.game_id);
@@ -181,13 +207,37 @@ export default function Home() {
                                 <p>{game.time_limit}</p>
                                 <p>{game.mode}</p>
                             </button>
-                        ))}
+                        ) : null
+                    )}
+                </div>
+            ) : null}
+            {option === "spectate" ? (
+                <div className={classes.gamelog}>
+                    <div className={classes.header}>
+                        <p align="center">player</p>
+                        <p align="center">Time Limit</p>
+                        <p align="center">Mode</p>
                     </div>
-                </>
-            ) : (
-                <></>
-            )}
-            {create === null ? <div className={classes.optionmenu}></div> : <></>}
+                    {Object.values(games).map((game) =>
+                        game.state === "active" ? (
+                            <button
+                                key={game.game_id}
+                                className={classes.game}
+                                onClick={() => {
+                                    setId(game.game_id);
+                                    setStart(true);
+                                }}
+                                style={changeOptionColor(id, game.game_id)}
+                            >
+                                <p>{["White", "Black"][game.player]}</p>
+                                <p>{game.time_limit}</p>
+                                <p>{game.mode}</p>
+                            </button>
+                        ) : null
+                    )}
+                </div>
+            ) : null}
+            {option === null ? <div className={classes.optionmenu}></div> : <></>}
             <div className={classes.mainoptions}>
                 <button className={classes.mainoption} style={changeOptionColor(start, true)} onClick={() => handleStart()}>
                     Start Game

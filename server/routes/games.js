@@ -14,9 +14,9 @@ module.exports = (io) => {
 
         if (sockets[socket.id] !== room) {
             const index = rooms[room].indexOf(null);
-            rooms[room][index] = socket.id;
             sockets[socket.id] = room;
             if (index !== -1) {
+                rooms[room][index] = socket.id;
                 return index;
             } else {
                 return null;
@@ -46,8 +46,12 @@ module.exports = (io) => {
                 const { mode, time_limit, player, depth } = gamesRes.rows[0];
                 const moves = movesRes.rows;
                 cb(mode, time_limit, depth, position, player, moves);
-                if ((mode === "online" && position === 1) || mode !== "online") {
+                console.log(rooms[room]);
+                if ((mode === "online" && !rooms[room].includes(null)) || mode !== "online") {
                     io.in(room).emit("start");
+                    console.log("updating to active");
+
+                    io.emit("gamestate", { game_id: room, state: "active" });
                     db.query(
                         `UPDATE games
                             SET state = 'active'
@@ -61,6 +65,22 @@ module.exports = (io) => {
         socket.on("leave-room", (room) => {
             socket.leave(room);
             leaveRoom(room, socket);
+            if (rooms[room]) {
+                if (rooms[room].includes(null)) {
+                    db.query(
+                        `UPDATE games
+                                SET state = 'waiting'
+                                WHERE game_id = $1 AND mode = 'online'
+                                RETURNING game_id;`,
+                        [room]
+                    ).then((result) => {
+                        if (result.rows[0]) {
+                            console.log("updating to waiting");
+                            io.emit("gamestate", { game_id: room, state: "waiting" });
+                        }
+                    });
+                }
+            }
         });
 
         socket.on("disconnect", () => {
@@ -70,6 +90,7 @@ module.exports = (io) => {
         });
 
         socket.on("creategame", (info, cb) => {
+            console.log("creategame");
             const { mode, player, timeLimit, depth } = info;
 
             const queryStr = format(
@@ -81,14 +102,15 @@ module.exports = (io) => {
 
             db.query(queryStr).then((result) => {
                 cb(result.rows[0].game_id);
-                socket.broadcast.emit("newgame", result.rows[0]);
+                socket.broadcast.emit("gamenew", result.rows[0]);
             });
         });
 
         socket.on("games", (cb) => {
             db.query(
                 `SELECT * FROM games 
-                WHERE state = 'waiting' AND mode = 'online';`
+                WHERE mode = 'online'
+                AND state IN ('waiting','active');`
             ).then((result) => {
                 cb(result.rows);
             });
