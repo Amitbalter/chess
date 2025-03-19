@@ -1,4 +1,4 @@
-This app is a project in full-stack web development.
+This chess website is a project in full-stack web development.
 
 It is currently possible to play opponents both online, offline and against the computer* 
 
