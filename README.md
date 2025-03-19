@@ -1,6 +1,6 @@
 This chess website is a project in full-stack web development.
 
-It is possible to play opponents both online, offline and against the computer* 
+It is possible to play opponents both online, offline and against the computer*.
 
 The deployed site can be found at https://chess-client-2upu.onrender.com/#/.
 
