@@ -12,6 +12,6 @@ Start the backend server by running 'npm run start'. <br>
 Start the frontend by running 'npm run dev'. <br>
 
 Note: make sure to run the backend on port 1234 and the frontend on port 3000. <br>
-These can be changed in the client/src/api.js and the serve/index.js files.
+These can be changed in the client/src/api.js and the server/index.js files.
 
 *The hard difficulty is currently slow and is under maintainance. 
