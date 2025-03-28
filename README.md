@@ -13,10 +13,13 @@ run ```docker compose up -d```
 
 Manually:
 
-Ensure the node version is at least v23.3.0. <br>
+Requirements: Node (v23.3.0) PostgreSQL (16.8)
+
 Clone the repository. <br>
-Start the backend server by running ```npm run start```. <br>
-Start the frontend by running ```npm run dev```. <br>
+Run ```npm install``` in both client and server to install node_modules. <br>
+Create ```.env.development``` (```.env.production``` for production) file in root of server with ```PGDATABASE``` variable set to name of database. <br>
+Run ```npm run start``` to start the backend server. <br>
+Run ```npm run dev``` to start the frontend. <br>
 
 Note: make sure to run the backend on port 1234 and the frontend on port 3000. <br>
 These can be changed in the client/src/api.js and the server/index.js files.
