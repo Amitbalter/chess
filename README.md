@@ -6,6 +6,14 @@ The deployed site can be found at https://chess-client-2upu.onrender.com/#/.
 
 To run locally:
 
+Using Docker:
+
+Clone the repository. <br>
+cd into it repository. <br>
+run ```docker compose up -d```
+
+Manually:
+
 Ensure the node version is at least v23.3.0. <br>
 Clone the repository. <br>
 Start the backend server by running 'npm run start'. <br>
