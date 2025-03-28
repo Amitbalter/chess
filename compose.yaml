@@ -1,0 +1,45 @@
+services:
+    client:
+        build: ./client
+        ports:
+            - "3000:3000"
+        networks:
+            - chess-network
+        depends_on:
+            - server
+
+    server:
+        build: ./server
+        ports:
+            - "1234:1234"
+        environment:
+            - PGHOST=db
+            - PGDATABASE=chess
+            - PGUSER=docker_user
+            - PGPASSWORD=docker_password
+            - PGPORT=5432
+        depends_on:
+            - db
+        networks:
+            - chess-network
+        restart: unless-stopped
+
+    db:
+        image: postgres:16.8
+        environment:
+            POSTGRES_USER: docker_user
+            POSTGRES_PASSWORD: docker_password
+            POSTGRES_DB: chess
+        volumes:
+            - chess_data:/var/lib/postgresql/data
+        networks:
+            - chess-network
+        restart: unless-stopped
+
+networks:
+    chess-network:
+        driver: bridge
+
+volumes:
+    chess_data:
+        name: chess_data

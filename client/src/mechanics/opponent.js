@@ -1,8 +1,18 @@
-function bestPosition(board, depth) {
-    const possibleMoves = [];
-    let values = [];
+function bestPosition(board, depth, alpha, beta) {
     const player = board.turn % 2;
 
+    if (board.state === "checkmate") {
+        console.log("checkmate");
+        return [[-1000, 1000][player]];
+    } else if (board.state === "stalemate" || board.state === "threefold") {
+        return [0];
+    }
+
+    if (depth === 0) {
+        return [valuation(board)];
+    }
+
+    const possibleMoves = [];
     for (let pos in board.pieces[["white", "black"][player]]) {
         const piece = board.pieces[["white", "black"][player]][pos];
         for (let move of piece.moves) {
@@ -16,30 +26,57 @@ function bestPosition(board, depth) {
         }
     }
 
-    for (let move of possibleMoves) {
-        const copy = board.replicate();
-        copy.makeMove(...move);
-        if (copy.state === "checkmate") {
-            values.push([1000, -1000][player]);
-        } else if (copy.state === "stalemate" || copy.state === "threefold") {
-            values.push(0);
-        } else {
-            if (depth === 0) {
-                values.push(valuation(copy));
-            } else {
-                values.push(bestPosition(copy, depth - 1)[1]);
+    if (player === 0) {
+        let bestVal = -10000;
+        let bestMove;
+        let count = 0;
+        for (let move of possibleMoves) {
+            const copy = board.replicate();
+            copy.makeMove(...move);
+            const val = bestPosition(copy, depth - 1, alpha, beta)[0];
+
+            if (val > bestVal) {
+                console.log("player", player, "val", val, "move", move);
+                count = 1;
+                bestVal = val;
+                bestMove = move;
+            } else if (val === bestVal) {
+                count++;
+                if (Math.random() < 1 / count) bestMove = move;
             }
+
+            alpha = Math.max(alpha, val);
+            // if (beta <= alpha) break;
         }
+        // console.log(bestVal, bestMove);
+        return [bestVal, bestMove];
     }
 
-    if (player === 0) {
-        const maxValue = Math.max(...values);
-        const bestMove = possibleMoves[values.indexOf(maxValue)];
-        return [bestMove, maxValue];
-    } else if (player === 1) {
-        const minValue = Math.min(...values);
-        const bestMove = possibleMoves[values.indexOf(minValue)];
-        return [bestMove, minValue];
+    if (player === 1) {
+        let bestVal = 10000;
+        let bestMove;
+        let count = 0;
+        for (let move of possibleMoves) {
+            const copy = board.replicate();
+            copy.makeMove(...move);
+            const val = bestPosition(copy, depth - 1, alpha, beta)[0];
+
+            if (val < bestVal) {
+                console.log("player", player, "val", val, "move", move);
+                count = 1;
+                bestVal = val;
+                bestMove = move;
+            } else if (val === bestVal) {
+                count++;
+                if (Math.random() < 1 / count) bestMove = move;
+            }
+            beta = Math.min(beta, val);
+
+            // player === 0 ? (alpha = Math.max(alpha, val)) : (beta = Math.min(beta, val));
+            // if (beta <= alpha) break;
+        }
+        // console.log(bestVal, bestMove);
+        return [bestVal, bestMove];
     }
 }
 
@@ -55,5 +92,14 @@ function valuation(board) {
 }
 
 export default function bestMove(board, depth) {
-    return bestPosition(board, depth)[0];
+    return bestPosition(board, depth, -10000, 10000)[1];
 }
+
+// if (sign * val > sign * bestVal) {
+//     count = 1;
+//     bestVal = val;
+//     bestMove = move;
+// } else if (val === bestVal) {
+//     count++;
+//     if (Math.random() < 1 / count) bestMove = move;
+// }

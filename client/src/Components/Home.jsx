@@ -156,13 +156,13 @@ export default function Home() {
                     </div>
                     {mode === "computer" ? (
                         <div className={classes.options}>
-                            <button onClick={() => setDepth(0)} className={classes.option} style={changeOptionColor(depth, 0)}>
+                            <button onClick={() => setDepth(1)} className={classes.option} style={changeOptionColor(depth, 1)}>
                                 Easy
                             </button>
-                            <button onClick={() => setDepth(1)} className={classes.option} style={changeOptionColor(depth, 1)}>
+                            <button onClick={() => setDepth(2)} className={classes.option} style={changeOptionColor(depth, 2)}>
                                 Medium
                             </button>
-                            <button onClick={() => setDepth(2)} className={classes.option} style={changeOptionColor(depth, 2)}>
+                            <button onClick={() => setDepth(3)} className={classes.option} style={changeOptionColor(depth, 3)}>
                                 Hard
                             </button>
                         </div>
