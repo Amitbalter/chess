@@ -4,14 +4,15 @@ import Bishop from "./bishop.js";
 import Queen from "./queen.js";
 import Empty from "./empty.js";
 import Piece from "./piece.js";
+import { BoardInterface } from "./board.js";
 
 export default class Pawn extends Piece {
-    constructor(color) {
+    constructor(color: string) {
         super(color);
         this.label = "P";
     }
 
-    updateMoves(board) {
+    updateMoves(board: BoardInterface): void {
         const [i, j] = this.position;
         this.moves = [];
         const player = this.color === "white" ? 0 : 1;
@@ -53,7 +54,7 @@ export default class Pawn extends Piece {
         }
     }
 
-    move(i1, j1, i2, j2, board) {
+    move(i1: number, j1: number, i2: number, j2: number, board: BoardInterface): void {
         const piece = board.array[i2][j2].piece;
         const player = this.color === "white" ? 0 : 1;
 
@@ -71,7 +72,7 @@ export default class Pawn extends Piece {
                 N: new Knight(this.color),
             };
             board.setPiece(i1, j1, new Empty());
-            board.setPiece(i2, j2, pieces[board.promoted]);
+            board.setPiece(i2, j2, pieces[board.promoted as string]);
         } else if (this.color !== piece.color) {
             board.doMove(i1, j1, i2, j2);
         }

@@ -4,21 +4,68 @@ import Knight from "./knight.js";
 import Bishop from "./bishop.js";
 import Queen from "./queen.js";
 import King from "./king.js";
-import Empty from "./empty.js";
+import Empty, { EmptyInterface } from "./empty.js";
+import Piece, { PieceInterface } from "./piece.js";
 
-class square {
-    constructor(color, position, piece) {
+interface SquareInterface {
+    color: string;
+    position: number[];
+    piece: PieceInterface | EmptyInterface;
+}
+
+export interface BoardInterface {
+    array: SquareInterface[][];
+    enPassant: (number | null)[];
+    pieces: { [key: string]: { [key: string]: PieceInterface } };
+    moves: (string | null)[][];
+    turn: number;
+    state: string | null;
+    history: BoardInterface[];
+    lastMove: number[] | null;
+    promoted: string | null;
+    movelog: [number, number, string][];
+    king: (string | null)[];
+    setupBoard(): void;
+    setPiece(i: number, j: number, piece1: PieceInterface | EmptyInterface): void;
+    doMove(i1: number, j1: number, i2: number, j2: number): void;
+    updateBoardMoves(k: number): void;
+    kingInCheck(color: number): boolean;
+    duplicate(source: BoardInterface, target: BoardInterface): void;
+    replicate(): BoardInterface;
+    restore(turn: number): void;
+    equal(arr: BoardInterface): boolean;
+    makeMove(i1: number, j1: number, i2: number, j2: number, promoted: string | null): void;
+}
+
+class Square implements SquareInterface {
+    color: string;
+    position: number[];
+    piece: PieceInterface | EmptyInterface;
+
+    constructor(color: string, position: number[], piece: EmptyInterface) {
         this.color = color;
         this.position = position;
         this.piece = piece;
     }
 }
 
-export default class Board {
+export default class Board implements BoardInterface {
+    array: SquareInterface[][];
+    enPassant: (number | null)[];
+    pieces: { [key: string]: { [key: string]: PieceInterface } };
+    moves: (string | null)[][];
+    turn: number;
+    state: string | null;
+    history: BoardInterface[];
+    lastMove: number[] | null;
+    promoted: string | null;
+    movelog: [number, number, string][];
+    king: (string | null)[];
+
     constructor() {
         this.array = Array.from({ length: 8 }).map((_, i) =>
             Array.from({ length: 8 }).map((_, j) => {
-                return new square(["white", "black"][(i + j) % 2], [i, j], new Empty());
+                return new Square(["white", "black"][(i + j) % 2], [i, j], new Empty());
             })
         );
         this.enPassant = [null, null];
@@ -58,14 +105,14 @@ export default class Board {
         this.history.push(JSON.parse(JSON.stringify(this)));
     }
 
-    setPiece(i, j, piece1) {
+    setPiece(i: number, j: number, piece1: PieceInterface | EmptyInterface): void {
         const piece2 = this.array[i][j].piece;
         if (piece2.label !== "") {
             delete this.pieces[piece2.color][`${i}${j}`];
         }
         this.array[i][j].piece = piece1; //place piece on square
-        piece1.position = [i, j]; //update position of piece
-        if (piece1.label !== "") {
+        if (piece1 instanceof Piece) {
+            piece1.position = [i, j]; //update position of piece
             this.pieces[piece1.color][`${i}${j}`] = piece1; //add piece to board pieces
             if (piece1.label === "K") {
                 this.king[piece1.color === "white" ? 0 : 1] = `${i}${j}`;
@@ -73,13 +120,13 @@ export default class Board {
         }
     }
 
-    doMove(i1, j1, i2, j2) {
+    doMove(i1: number, j1: number, i2: number, j2: number): void {
         this.setPiece(i2, j2, this.array[i1][j1].piece);
         this.setPiece(i1, j1, new Empty());
     }
 
     //function that updates all the possible moves on the board
-    updateBoardMoves(k) {
+    updateBoardMoves(k: number): void {
         this.moves[k] = [];
         for (let pos in this.pieces[["white", "black"][k]]) {
             const piece = this.pieces[["white", "black"][k]][pos];
@@ -89,14 +136,11 @@ export default class Board {
         this.moves[k] = [...new Set(this.moves[k])];
     }
 
-    kingInCheck(color) {
-        if (this.moves[(color + 1) % 2].includes(this.king[color % 2])) {
-            return true;
-        }
-        return false;
+    kingInCheck(color: number): boolean {
+        return this.moves[(color + 1) % 2].includes(this.king[color % 2]);
     }
 
-    duplicate(source, target) {
+    duplicate(source: BoardInterface, target: BoardInterface): void {
         target.turn = source.turn;
         target.enPassant = [...source.enPassant];
         target.state = source.state;
@@ -122,13 +166,13 @@ export default class Board {
         }
     }
 
-    replicate() {
+    replicate(): BoardInterface {
         const copy = new Board();
         this.duplicate(this, copy);
         return copy;
     }
 
-    restore(turn) {
+    restore(turn: number): void {
         const arrangement = this.history[turn];
 
         this.pieces = { white: {}, black: {} };
@@ -139,14 +183,14 @@ export default class Board {
 
         this.array = Array.from({ length: 8 }).map((_, i) =>
             Array.from({ length: 8 }).map((_, j) => {
-                return new square(["white", "black"][(i + j) % 2], [i, j], new Empty());
+                return new Square(["white", "black"][(i + j) % 2], [i, j], new Empty());
             })
         );
         this.duplicate(arrangement, this);
         this.updateBoardMoves(this.turn % 2);
     }
 
-    equal(arr) {
+    equal(arr: BoardInterface): boolean {
         if (JSON.stringify(this.enPassant) !== JSON.stringify(arr.enPassant)) {
             return false;
         }
@@ -162,9 +206,9 @@ export default class Board {
         return true;
     }
 
-    makeMove(i1, j1, i2, j2, promoted) {
+    makeMove(i1: number, j1: number, i2: number, j2: number, promoted: string | null): void {
         this.promoted = promoted;
-        const piece1 = this.array[i1][j1].piece;
+        const piece1 = this.array[i1][j1].piece as PieceInterface;
         piece1.move(i1, j1, i2, j2, this);
 
         this.turn++;
