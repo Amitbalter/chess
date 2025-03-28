@@ -1,12 +1,13 @@
+import { BoardInterface } from "./board";
 import Piece from "./piece";
 
 export default class Knight extends Piece {
-    constructor(color) {
+    constructor(color: string) {
         super(color);
         this.label = "N";
     }
 
-    updateMoves(board) {
+    updateMoves(board: BoardInterface): void {
         const [i, j] = this.position;
         this.moves = [];
         for (let k1 of [-1, 1]) {

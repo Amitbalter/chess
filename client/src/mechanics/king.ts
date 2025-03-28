@@ -1,13 +1,14 @@
 import Piece from "./piece";
+import { BoardInterface } from "./board";
 
 export default class King extends Piece {
-    constructor(color) {
+    constructor(color: string) {
         super(color);
         this.label = "K";
         this.castle = "Y";
     }
 
-    updateMoves(board) {
+    updateMoves(board: BoardInterface): void {
         const [i, j] = this.position;
         this.moves = [];
         for (let k1 of [-1, 0, 1]) {
@@ -62,7 +63,7 @@ export default class King extends Piece {
         }
     }
 
-    move(i1, j1, i2, j2, board) {
+    move(i1: number, j1: number, i2: number, j2: number, board: BoardInterface): void {
         const piece = board.array[i2][j2].piece;
         if (this.color !== piece.color) {
             board.doMove(i1, j1, i2, j2);

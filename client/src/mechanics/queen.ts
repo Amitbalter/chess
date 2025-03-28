@@ -1,12 +1,13 @@
+import { BoardInterface } from "./board";
 import Piece from "./piece";
 
 export default class Queen extends Piece {
-    constructor(color) {
+    constructor(color: string) {
         super(color);
         this.label = "Q";
     }
 
-    updateMoves(board) {
+    updateMoves(board: BoardInterface): void {
         const [i, j] = this.position;
         this.moves = [];
 
