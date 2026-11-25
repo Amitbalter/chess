@@ -3,9 +3,6 @@ const express = require("express");
 const { Server } = require("socket.io");
 const cors = require("cors");
 const { instrument } = require("@socket.io/admin-ui");
-const seed = require("./db/seeds/seed");
-
-seed();
 
 const app = express();
 const PORT = process.env.PORT || 1234;
