@@ -3,7 +3,7 @@ import { useEffect, createContext } from "react";
 
 export const SocketContext = createContext();
 
-const serverUrl = process.env.NODE_ENV === "production" ? import.meta.env.VITE_SERVER_URL : "http://localhost:1234";
+const serverUrl = import.meta.env.DEV ? "http://localhost:1234" : window.location.origin
 const socket = io.connect(serverUrl, {
     withCredentials: true,
     autoConnect: false,
