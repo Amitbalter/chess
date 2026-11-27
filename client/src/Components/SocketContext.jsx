@@ -1,9 +1,9 @@
 import io from "socket.io-client";
 import { useEffect, createContext } from "react";
+import { serverUrl } from "../api";
 
 export const SocketContext = createContext();
 
-const serverUrl = import.meta.env.DEV ? "http://localhost:1234" : window.location.origin
 const socket = io.connect(serverUrl, {
     withCredentials: true,
     autoConnect: false,

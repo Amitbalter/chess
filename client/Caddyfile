@@ -1,4 +1,4 @@
-:80 {
+{$CHESS_SITE_ADDRESS::80} {
     @backend path /games /games/* /socket.io /socket.io/*
     reverse_proxy @backend server:1234
 
