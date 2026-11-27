@@ -3,4 +3,3 @@ node_modules
 .gitignore
 Dockerfile
 .dockerignore
-package-lock.json

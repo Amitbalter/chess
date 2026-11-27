@@ -1,0 +1,26 @@
+services:
+    client:
+        ports: !override
+            - "80:80"
+            - "443:443"
+        environment:
+            CHESS_SITE_ADDRESS: "${CHESS_SITE_ADDRESS:?Set CHESS_SITE_ADDRESS to your public hostname or http://PUBLIC_IP}"
+        volumes:
+            - caddy_data:/data
+            - caddy_config:/config
+        restart: unless-stopped
+
+    server:
+        ports: !reset []
+        environment:
+            NODE_ENV: production
+            CHESS_FRONTEND_ORIGIN: "${CHESS_FRONTEND_ORIGIN:-}"
+            PGPASSWORD: "${CHESS_DB_PASSWORD:?Set CHESS_DB_PASSWORD in .env.ec2}"
+
+    db:
+        environment:
+            POSTGRES_PASSWORD: "${CHESS_DB_PASSWORD:?Set CHESS_DB_PASSWORD in .env.ec2}"
+
+volumes:
+    caddy_data:
+    caddy_config:

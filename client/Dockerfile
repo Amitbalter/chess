@@ -1,14 +1,12 @@
-FROM node:23.3.0
-
-WORKDIR /chess/client
+FROM node:24 AS build
+WORKDIR /app
 
 COPY package*.json ./
-
-RUN npm install 
+RUN npm ci
 
 COPY . .
+RUN npm run build
 
-EXPOSE 3000
-
-CMD ["npm", "run", "dev"]
-
+FROM caddy:2
+COPY Caddyfile /etc/caddy/Caddyfile
+COPY --from=build /app/dist/ /usr/share/caddy/

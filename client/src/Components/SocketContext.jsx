@@ -1,9 +1,9 @@
 import io from "socket.io-client";
 import { useEffect, createContext } from "react";
+import { serverUrl } from "../api";
 
 export const SocketContext = createContext();
 
-const serverUrl = process.env.NODE_ENV === "production" ? import.meta.env.VITE_SERVER_URL : "http://localhost:1234";
 const socket = io.connect(serverUrl, {
     withCredentials: true,
     autoConnect: false,

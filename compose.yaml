@@ -2,7 +2,7 @@ services:
     client:
         build: ./client
         ports:
-            - "3000:3000"
+            - "127.0.0.1:3000:80"
         networks:
             - chess-network
         depends_on:
