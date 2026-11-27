@@ -2,7 +2,7 @@ This chess website is a project in full-stack web development.
 
 It is possible to play opponents both online and offline, as well as against the computer.
 
-The deployed site can be found at https://chess-client-2upu.onrender.com/#/.
+The deployed site can be found at https://main.dqn5f3edwvjnr.amplifyapp.com/#/.
 
 To run locally:
 
